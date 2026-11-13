@@ -92,3 +92,61 @@ test("translated, scaled and rotated slices move their pixels after masking", ()
   assert.deepEqual(pixel(canvas, 180, 393), [0, 128, 0, 255]);
   assert.deepEqual(pixel(canvas, 300, 500), [0, 0, 255, 255]);
 });
+
+test("cached rendering matches fresh compositing and invalidates only affected slices", async () => {
+  const { createWhaleRenderer } = await import("../src/compositor.js");
+  const ids = ["apple", "google", "whatsapp", "facebook"];
+  const sources = Object.fromEntries(
+    await Promise.all(
+      ids.map(async (id) => [id, await loadImage(`public/whales/${id}.png`)]),
+    ),
+  );
+  let allocations = 0;
+  const renderer = createWhaleRenderer((width, height) => {
+    allocations++;
+    return createCanvas(width, height);
+  });
+  const cached = createCanvas(600, 600);
+  const fresh = createCanvas(600, 600);
+  let selected = { spout: ids[0], head: ids[1], body: ids[2], tail: ids[3] };
+  const check = (softness, transforms = {}) => {
+    renderer.render(cached, sources, selected, softness, transforms);
+    drawWhale(fresh, sources, selected, softness, createCanvas, transforms);
+    assert.deepEqual(
+      cached.getContext("2d").getImageData(0, 0, 600, 600).data,
+      fresh.getContext("2d").getImageData(0, 0, 600, 600).data,
+    );
+  };
+  check(20);
+  assert.equal(allocations, 4);
+  check(20, {
+    head: { x: 45, y: -32, scaleX: 1.3, scaleY: 0.7, rotation: 37 },
+  });
+  assert.equal(allocations, 4, "transforms reuse all masked slices");
+  selected = { ...selected, body: ids[0] };
+  check(20);
+  assert.equal(allocations, 5, "only the changed source is remasked");
+  check(80);
+  assert.equal(
+    allocations,
+    8,
+    "only the three feathered slices change with softness",
+  );
+  check(150);
+  assert.equal(allocations, 11);
+  check(100);
+  assert.equal(allocations, 11, "equivalent clamped softness reuses layers");
+  sources[selected.head] = await loadImage(
+    `public/whales/${selected.head}.png`,
+  );
+  check(100);
+  assert.equal(
+    allocations,
+    12,
+    "replacing the image object invalidates its slice",
+  );
+  renderer.dispose();
+  check(100);
+  assert.equal(allocations, 16, "disposing releases all four slots");
+  assert.equal(pixel(cached, 0, 0)[3], 0);
+});

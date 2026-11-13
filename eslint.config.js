@@ -3,7 +3,14 @@ import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
 
 export default [
-  { ignores: ["dist/**", "node_modules/**", "public/wasm/wasm_exec.js"] },
+  {
+    ignores: [
+      "dist/**",
+      "node_modules/**",
+      ".worktrees/**",
+      "public/wasm/wasm_exec.js",
+    ],
+  },
   js.configs.recommended,
   {
     files: ["**/*.{js,jsx,mjs}"],
@@ -23,4 +30,3 @@ export default [
     },
   },
 ];
-

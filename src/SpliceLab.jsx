@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { PARTS, parseEditorRecipe, shareEditorUrl } from "./mixer";
-import { drawWhale } from "./compositor";
+import { createWhaleRenderer } from "./compositor";
+import { createImageLoader } from "./image-loader";
 import {
   PART_BOUNDS,
   normalizeTransform,
@@ -23,6 +24,7 @@ export function SpliceLab() {
   const [items, setItems] = useState([]),
     [images, setImages] = useState({}),
     [failed, setFailed] = useState([]),
+    [retryRevision, setRetryRevision] = useState(0),
     [error, setError] = useState("");
   const [history, setHistory] = useState(null),
     [selected, setSelected] = useState("head"),
@@ -32,7 +34,11 @@ export function SpliceLab() {
     canvas = useRef(null),
     stage = useRef(null),
     gesture = useRef(null),
-    version = useRef(0);
+    version = useRef(0),
+    loader = useRef(null),
+    renderer = useRef(null),
+    frame = useRef(null),
+    pendingPoint = useRef(null);
   const setH = (next) => {
     historyRef.current = next;
     setHistory(next);
@@ -60,16 +66,6 @@ export function SpliceLab() {
         if (!alive) return;
         setItems(data);
         setH(createHistory(parseEditorRecipe(data, location.search)));
-        data.forEach((item) => {
-          const img = new Image();
-          img.onload = () => {
-            if (alive) setImages((old) => ({ ...old, [item.id]: img }));
-          };
-          img.onerror = () => {
-            if (alive) setFailed((old) => [...old, item.id]);
-          };
-          img.src = asset(item.file);
-        });
       })
       .catch(() => {
         if (alive)
@@ -82,18 +78,58 @@ export function SpliceLab() {
     };
   }, []);
   const state = history?.present;
-  const ready = state && PARTS.every((part) => images[state.parts[part]]);
+  const selectedIds = state
+    ? [...new Set(PARTS.map((part) => state.parts[part]))].sort()
+    : [];
+  const selectedKey = selectedIds.join("|");
+  useEffect(() => {
+    const imageLoader = createImageLoader();
+    const whaleRenderer = createWhaleRenderer();
+    loader.current = imageLoader;
+    renderer.current = whaleRenderer;
+    return () => {
+      if (frame.current !== null) cancelAnimationFrame(frame.current);
+      imageLoader.dispose();
+      whaleRenderer.dispose();
+      loader.current = null;
+      renderer.current = null;
+    };
+  }, []);
+  useEffect(() => {
+    if (!selectedKey || !loader.current) return;
+    let active = true;
+    selectedKey.split("|").forEach((id) => {
+      const item = items.find((candidate) => candidate.id === id);
+      if (!item) return;
+      loader.current.load(id, asset(item.file)).then((entry) => {
+        if (!active) return;
+        if (entry.status === "ready")
+          setImages((old) =>
+            old[id] === entry.image ? old : { ...old, [id]: entry.image },
+          );
+        else setFailed((old) => (old.includes(id) ? old : [...old, id]));
+      });
+    });
+    return () => {
+      active = false;
+    };
+  }, [items, selectedKey, retryRevision]);
+  const ready = state && selectedIds.every((id) => images[id]);
   useEffect(() => {
     if (ready && canvas.current)
-      drawWhale(
+      renderer.current?.render(
         canvas.current,
         images,
         state.parts,
         state.softness,
-        undefined,
         state.transforms,
       );
-  }, [images, ready, state]);
+  }, [ready, state, images]);
+  const retryImages = () => {
+    failed.forEach((id) => loader.current.retry(id));
+    setFailed([]);
+    setRetryRevision((revision) => revision + 1);
+  };
   const edit = (next) => {
     invalidate();
     setH(commitEdit(historyRef.current, next));
@@ -139,10 +175,9 @@ export function SpliceLab() {
     setH(beginGesture(historyRef.current));
     stage.current.setPointerCapture(event.pointerId);
   };
-  const move = (event) => {
+  const applyMove = (p) => {
     const g = gesture.current;
-    if (!g || g.id !== event.pointerId) return;
-    const p = point(event);
+    if (!g || !p) return;
     let patch;
     if (g.mode === "move")
       patch = {
@@ -174,8 +209,27 @@ export function SpliceLab() {
       }),
     );
   };
+  const move = (event) => {
+    if (!gesture.current || gesture.current.id !== event.pointerId) return;
+    pendingPoint.current = point(event);
+    if (frame.current === null)
+      frame.current = requestAnimationFrame(() => {
+        frame.current = null;
+        const latest = pendingPoint.current;
+        pendingPoint.current = null;
+        applyMove(latest);
+      });
+  };
   const finish = (event, cancelled = false) => {
     if (!gesture.current || gesture.current.id !== event.pointerId) return;
+    if (frame.current !== null) cancelAnimationFrame(frame.current);
+    frame.current = null;
+    if (!cancelled) {
+      if (typeof event.clientX === "number")
+        pendingPoint.current = point(event);
+      applyMove(pendingPoint.current);
+    }
+    pendingPoint.current = null;
     gesture.current = null;
     setH(
       cancelled
@@ -389,9 +443,21 @@ export function SpliceLab() {
                   <div className="stage-message" role="status">
                     {failed.some((id) =>
                       PARTS.some((part) => state.parts[part] === id),
-                    )
-                      ? "A selected image could not be loaded. Choose another specimen."
-                      : "Preparing your specimen…"}
+                    ) ? (
+                      <span>
+                        A selected image could not be loaded.{" "}
+                        <button
+                          type="button"
+                          onPointerDown={(event) => event.stopPropagation()}
+                          onClick={retryImages}
+                        >
+                          Retry
+                        </button>{" "}
+                        or choose another specimen.
+                      </span>
+                    ) : (
+                      "Preparing your specimen…"
+                    )}
                   </div>
                 )}
               </div>
