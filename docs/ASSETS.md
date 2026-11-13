@@ -9,3 +9,5 @@ WhatsApp's image is the original artwork shown by [Emojipedia for WhatsApp 2.23.
 The primary font is Space Grotesk, copyright 2020 The Space Grotesk Project Authors, under the SIL Open Font License 1.1. Its unmodified Latin variable WOFF2 was retrieved from the official Google Fonts stylesheet on 2026-11-13 and is served locally. The full license is in `public/fonts/OFL-Space-Grotesk.txt`. Mono labels use the system monospace font.
 
 The original line-art whale and raster social preview are generated using `tools/lineart`. They do not contain vendor emoji artwork. Remixing licensed artwork may create attribution or share-alike obligations; a downloaded collage does not grant additional rights to any source artwork.
+
+Exports combine and modify source images. When sharing a collage, credit the source creators, link to their sources and licenses, and indicate that the artwork was modified. The project license does not replace the artwork licenses.
