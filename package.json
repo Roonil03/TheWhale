@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint . && stylelint \"src/**/*.css\" && html-validate index.html",
+    "lint": "eslint . && stylelint \"src/**/*.css\" && html-validate index.html lab.html",
     "test": "node --test",
     "verify:build": "node tools/verify-build.mjs"
   },

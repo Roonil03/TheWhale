@@ -4,6 +4,14 @@ A field guide to the spouting whale emoji, with a browser-based splice lab for c
 
 Dark mode is the default. Use the header theme button for light mode; your choice stays in this browser. Search twenty current and historical renderings by platform or version, load a specimen into the lab, then choose its spout, head, body and tail independently. The lab exports a transparent PNG and creates a URL that restores the recipe.
 
+## Splice editor
+
+The editor has its own page at [lab.html](https://roonil03.github.io/TheWhale/lab.html). Select Spout, Head, Body or Tail, choose its source artwork, and drag the selected slice around the canvas. The corner handle resizes the slice and its top handle rotates it. The inspector offers precise X/Y, width, height and rotation controls; Reset part restores only that part's transform.
+
+Undo and Redo retain up to fifty edits, including source changes, seam adjustments, transformations, shuffle and reset. A completed pointer gesture is one edit; Escape cancels it. While the canvas is focused, arrow keys nudge the selected part by one pixel, or ten with Shift. Ctrl/Cmd+Z undoes; Ctrl/Cmd+Shift+Z or Ctrl+Y redoes. Text fields keep their normal editing shortcuts.
+
+PNG export contains the transparent 600×600 canvas, without selection outlines or controls. Parts outside the canvas are clipped. Share links retain sources, seam strength and transforms; older source-only recipes still open correctly. The home gallery links into this dedicated editor and does not load its interaction code until needed.
+
 ## Develop
 
 Use Node.js 22.22 or newer in the Node 22 line, or Node.js 24.8 or newer, and npm:
