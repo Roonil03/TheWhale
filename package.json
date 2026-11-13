@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . && stylelint \"src/**/*.css\" && html-validate index.html",
-    "test": "node --test"
+    "test": "node --test",
+    "verify:build": "node tools/verify-build.mjs"
   },
   "dependencies": {
     "react": "^19.2.0",
@@ -16,16 +17,17 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@napi-rs/canvas": "^1.1.1",
     "@vitejs/plugin-react": "^5.1.1",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "globals": "^16.5.0",
-    "html-validate": "^10.4.0",
+    "html-validate": "^11.21.1",
     "stylelint": "^16.26.1",
     "stylelint-config-standard": "^39.0.1",
     "vite": "^7.2.2"
   },
   "engines": {
-    "node": ">=22.12.0"
+    "node": "^22.22.0 || >=24.8.0"
   }
 }

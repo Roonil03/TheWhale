@@ -1,6 +1,6 @@
 # Design decisions
 
-The Whale is an unofficial specimen collection and a playful image collage tool. Ice white, navy, cobalt and a small acid-yellow accent give the gallery a marine field-guide character. Space Grotesk supplies the main type; system monospace labels evoke specimen notes without adding another font request.
+The Whale is an unofficial specimen collection and a playful image collage tool. Ocean ink, deep-blue surfaces, ice text, cyan and a small acid-yellow accent give the default dark gallery a marine field-guide character. An explicit light-mode option uses ice white, navy and cobalt. The selected mode persists locally and is applied before the first paint, with dark as the default even on a light operating system. Space Grotesk supplies the main type; system monospace labels evoke specimen notes without adding another font request.
 
 ## Animation reel review
 
