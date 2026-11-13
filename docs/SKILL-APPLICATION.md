@@ -1,6 +1,6 @@
 # Source application and review guide
 
-These are implementation mappings and future review checks, not claims that each upstream tool or full audit was run. The converted project skills are installed in `.agents/skills/` for Codex discovery. They are scoped to this repository.
+These are implementation mappings and future review checks, not claims that each upstream tool or full audit was run. The converted project skills were installed locally in `.agents/skills/` and applied to this project. At the user's request they are ignored by Git and are not distributed with the repository.
 
 - **Emil:** `src/style.css` contains the hero ripple and reduced-motion rule. Review its purpose, visual weight, transform/opacity and behavior when motion is reduced; preserve immediate feedback in `src/main.jsx` controls. See `.agents/skills/animation-craft`.
 - **Impeccable:** Review hierarchy, spacing, contrast, focus, loading and errors in `src/main.jsx` and `src/style.css`. Its real detector has context-sensitive heuristics and was not run; avoid presenting a heuristic as an audit finding. See `.agents/skills/design-review`.

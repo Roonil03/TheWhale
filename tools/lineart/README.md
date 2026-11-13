@@ -9,6 +9,6 @@ go mod download
 go run .
 ```
 
-This writes `public/whale-blueprint.svg` and `public/og.png`. The SVG coordinates are rounded to subpixel precision to reduce transfer size. Generated files are committed, so neither Node builds nor GitHub Pages require Go. The browser never runs the renderer.
+This writes `public/whale-blueprint.svg`. The SVG coordinates are rounded to subpixel precision to reduce transfer size. From the repository root, run `node tools/generate-og.mjs` after `npm ci` to create the branded `public/og.png` from the blueprint and the local font. Generated files are committed, so ordinary Node builds and GitHub Pages do not require Go. The browser never runs the renderer.
 
 The drawing uses the renderer's sphere primitive with a sparser path set, scaled into a body, tail, flipper and spout. The third-party module versions and checksums are fixed in `go.mod` and `go.sum`.

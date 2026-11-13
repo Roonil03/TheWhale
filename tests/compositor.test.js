@@ -40,7 +40,7 @@ test("softened boundaries mix adjacent sources while retaining a solid interior"
 });
 
 test("real vendor artwork exports a decodable 600px PNG with transparent corners", async () => {
-  const ids = ["google", "twitter"];
+  const ids = ["apple", "google", "whatsapp", "facebook"];
   const loaded = Object.fromEntries(
     await Promise.all(
       ids.map(async (id) => [id, await loadImage(`public/whales/${id}.png`)]),
@@ -51,10 +51,10 @@ test("real vendor artwork exports a decodable 600px PNG with transparent corners
     canvas,
     loaded,
     {
-      spout: "google",
+      spout: "apple",
       head: "google",
-      body: "twitter",
-      tail: "twitter",
+      body: "whatsapp",
+      tail: "facebook",
     },
     20,
     createCanvas,
