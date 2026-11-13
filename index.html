@@ -3,7 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f2f7f7" />
+    <meta name="theme-color" content="#07141e" />
+    <script>
+      try {
+        document.documentElement.dataset.theme =
+          localStorage.getItem("whale-theme") === "light" ? "light" : "dark";
+      } catch {
+        document.documentElement.dataset.theme = "dark";
+      }
+      document.querySelector('meta[name="theme-color"]').content =
+        document.documentElement.dataset.theme === "light"
+          ? "#f3f8f7"
+          : "#07141e";
+    </script>
     <meta
       name="description"
       content="A field guide to the spouting whale emoji. Explore the designs, then splice your own improbable specimen."

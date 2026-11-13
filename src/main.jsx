@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
 import { PARTS as keys, initialMix, shareUrl } from "./mixer";
+import { drawWhale } from "./compositor";
 
 const base = import.meta.env.BASE_URL;
 const asset = (path) => base + path.replace(/^\/?/, "");
@@ -23,51 +24,22 @@ function ImageAsset({ item }) {
   );
 }
 
-function draw(canvas, images, parts, softness) {
-  const size = 600,
-    y = 186,
-    third = 200,
-    feather = softness * 0.55;
-  canvas.width = canvas.height = size;
-  const ctx = canvas.getContext("2d");
-  const paint = (image, x1, y1, x2, y2, fade) => {
-    const layer = document.createElement("canvas");
-    layer.width = layer.height = size;
-    const c = layer.getContext("2d");
-    const scale = Math.min(
-      size / image.naturalWidth,
-      size / image.naturalHeight,
-    );
-    const w = image.naturalWidth * scale,
-      h = image.naturalHeight * scale;
-    c.drawImage(image, (size - w) / 2, (size - h) / 2, w, h);
-    c.globalCompositeOperation = "destination-in";
-    if (fade && feather) {
-      const gradient = c.createLinearGradient(x1, 0, x2, 0),
-        f = Math.min(0.45, feather / (x2 - x1));
-      gradient.addColorStop(0, x1 === 0 ? "#000" : "transparent");
-      gradient.addColorStop(f, "#000");
-      gradient.addColorStop(1 - f, "#000");
-      gradient.addColorStop(1, x2 === size ? "#000" : "transparent");
-      c.fillStyle = gradient;
-    } else c.fillStyle = "#000";
-    c.fillRect(x1, y1, x2 - x1, y2 - y1);
-    ctx.drawImage(layer, 0, 0);
-  };
-  paint(images[parts.head], 0, y, third + feather, size, true);
-  paint(
-    images[parts.body],
-    third - feather,
-    y,
-    third * 2 + feather,
-    size,
-    true,
-  );
-  paint(images[parts.tail], third * 2 - feather, y, size, size, true);
-  paint(images[parts.spout], 0, 0, size, y, false);
-}
-
 function App() {
+  const [theme, setTheme] = useState(
+    () => document.documentElement.dataset.theme || "dark",
+  );
+  const toggleTheme = () => {
+    const next = theme === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    document.querySelector('meta[name="theme-color"]').content =
+      next === "light" ? "#f3f8f7" : "#07141e";
+    try {
+      localStorage.setItem("whale-theme", next);
+    } catch {
+      // The current session still works when storage is unavailable.
+    }
+    setTheme(next);
+  };
   const [items, setItems] = useState([]),
     [error, setError] = useState(""),
     [query, setQuery] = useState("");
@@ -78,7 +50,13 @@ function App() {
     [notice, setNotice] = useState(""),
     [exportUrl, setExportUrl] = useState("");
   const canvas = useRef(null),
-    lab = useRef(null);
+    lab = useRef(null),
+    recipeVersion = useRef(0);
+  const invalidateExport = () => {
+    recipeVersion.current += 1;
+    setExportUrl("");
+    setNotice("");
+  };
   useEffect(
     () => () => {
       if (exportUrl) URL.revokeObjectURL(exportUrl);
@@ -119,9 +97,11 @@ function App() {
   );
   const ready = parts && keys.every((key) => images[parts[key]]);
   useEffect(() => {
-    if (ready && canvas.current) draw(canvas.current, images, parts, softness);
+    if (ready && canvas.current)
+      drawWhale(canvas.current, images, parts, softness);
   }, [images, parts, softness, ready]);
   const choose = (id) => {
+    invalidateExport();
     setParts(Object.fromEntries(keys.map((key) => [key, id])));
     setNotice("Specimen loaded into the lab.");
     lab.current?.scrollIntoView({
@@ -131,6 +111,7 @@ function App() {
     });
   };
   const reset = () => {
+    invalidateExport();
     setParts(
       Object.fromEntries(
         keys.map((key, i) => [key, items[i % items.length].id]),
@@ -140,6 +121,7 @@ function App() {
     setNotice("Lab reset.");
   };
   const shuffle = () => {
+    invalidateExport();
     setParts(
       Object.fromEntries(
         keys.map((key) => [
@@ -160,9 +142,11 @@ function App() {
     }
   };
   const download = () => {
+    const version = recipeVersion.current;
     try {
       canvas.current.toBlob((blob) => {
         try {
+          if (version !== recipeVersion.current) return;
           if (!blob) throw new Error("PNG creation failed");
           const url = URL.createObjectURL(blob);
           setExportUrl(url);
@@ -196,6 +180,17 @@ function App() {
           <a href="#lab">Splice lab ↗</a>
         </nav>
         <span className="edition">EST. ONLINE · 01</span>
+        <button
+          className="theme-toggle"
+          type="button"
+          onClick={toggleTheme}
+          aria-label={
+            theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+          }
+        >
+          <span aria-hidden="true">{theme === "dark" ? "☼" : "◐"}</span>
+          <span>{theme === "dark" ? "LIGHT" : "DARK"}</span>
+        </button>
       </header>
       <main id="top">
         <section className="hero wrap">
@@ -412,9 +407,10 @@ function App() {
                       </span>
                       <select
                         value={parts[key]}
-                        onChange={(e) =>
-                          setParts({ ...parts, [key]: e.target.value })
-                        }
+                        onChange={(e) => {
+                          invalidateExport();
+                          setParts({ ...parts, [key]: e.target.value });
+                        }}
                       >
                         {items.map((item) => (
                           <option key={item.id} value={item.id}>
@@ -433,7 +429,10 @@ function App() {
                     min="0"
                     max="100"
                     value={softness}
-                    onChange={(e) => setSoftness(Number(e.target.value))}
+                    onChange={(e) => {
+                      invalidateExport();
+                      setSoftness(Number(e.target.value));
+                    }}
                   />
                   <span className="range-ends">
                     <small>SHARP</small>
