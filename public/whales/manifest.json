@@ -1,0 +1,18 @@
+[
+  {
+    "id": "google",
+    "name": "Google",
+    "file": "/whales/google.png",
+    "source": "https://github.com/iamcal/emoji-data/tree/master/img-google-136",
+    "license": "Apache-2.0; Google Noto Emoji authors",
+    "version": "Noto Emoji v2.048"
+  },
+  {
+    "id": "twitter",
+    "name": "Twitter",
+    "file": "/whales/twitter.png",
+    "source": "https://github.com/iamcal/emoji-data/tree/master/img-twitter-72",
+    "license": "CC BY 4.0; Twitter, Inc. and other contributors",
+    "version": "Twemoji fork v16.0.1"
+  }
+]

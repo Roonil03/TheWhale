@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://roonil03.github.io/TheWhale/sitemap.xml
