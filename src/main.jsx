@@ -3,9 +3,15 @@ import { createRoot } from "react-dom/client";
 import "./style.css";
 import { PARTS as keys, initialMix, shareUrl } from "./mixer";
 import { drawWhale } from "./compositor";
+import { LivingWhale } from "./LivingWhale";
 
 const base = import.meta.env.BASE_URL;
 const asset = (path) => base + path.replace(/^\/?/, "");
+const labPage = location.pathname.endsWith("/lab.html");
+if (!labPage && keys.some((key) => new URLSearchParams(location.search).has(key))) {
+  location.replace(`${asset("lab.html")}${location.search}${location.hash}`);
+}
+const labUrl = (id) => shareUrl(new URL(asset("lab.html"), location.href).href, Object.fromEntries(keys.map((key) => [key, id])), 20);
 const pad = (n) => String(n).padStart(2, "0");
 
 function ImageAsset({ item }) {
@@ -50,7 +56,6 @@ function App() {
     [notice, setNotice] = useState(""),
     [exportUrl, setExportUrl] = useState("");
   const canvas = useRef(null),
-    lab = useRef(null),
     recipeVersion = useRef(0);
   const invalidateExport = () => {
     recipeVersion.current += 1;
@@ -101,14 +106,7 @@ function App() {
       drawWhale(canvas.current, images, parts, softness);
   }, [images, parts, softness, ready]);
   const choose = (id) => {
-    invalidateExport();
-    setParts(Object.fromEntries(keys.map((key) => [key, id])));
-    setNotice("Specimen loaded into the lab.");
-    lab.current?.scrollIntoView({
-      behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
-        ? "auto"
-        : "smooth",
-    });
+    location.assign(labUrl(id));
   };
   const reset = () => {
     invalidateExport();
@@ -170,14 +168,14 @@ function App() {
   return (
     <>
       <header className="topbar">
-        <a className="brand" href="#top">
+        <a className="brand" href={asset("")}>
           <span className="brand-mark">◉</span> THE WHALE{" "}
           <span className="brand-divider">/</span>{" "}
           <span className="brand-sub">FIELD GUIDE</span>
         </a>
         <nav aria-label="Main navigation">
-          <a href="#collection">The collection</a>
-          <a href="#lab">Splice lab ↗</a>
+          <a href={asset("") + "#collection"}>The collection</a>
+          <a href={asset("lab.html")}>Splice lab ↗</a>
         </nav>
         <span className="edition">EST. ONLINE · 01</span>
         <button
@@ -192,7 +190,8 @@ function App() {
           <span>{theme === "dark" ? "LIGHT" : "DARK"}</span>
         </button>
       </header>
-      <main id="top">
+      <main id="top" className={labPage ? "lab-page" : undefined}>
+        {!labPage && <>
         <section className="hero wrap">
           <div className="hero-copy">
             <p className="eyebrow">
@@ -214,7 +213,7 @@ function App() {
               <a className="button primary" href="#collection">
                 Explore the collection <span>↘</span>
               </a>
-              <a className="text-link" href="#lab">
+              <a className="text-link" href={asset("lab.html")}>
                 Go make a monster ↗
               </a>
             </div>
@@ -336,7 +335,8 @@ function App() {
             <span>SELECT A SPECIMEN TO START SPLICING ↗</span>
           </div>
         </section>
-        <section className="lab" id="lab" ref={lab}>
+        </>}
+        {labPage && <section className="lab" id="lab">
           <div className="wrap">
             <div className="lab-heading">
               <div>
@@ -350,8 +350,8 @@ function App() {
                 </h2>
               </div>
               <p>
-                What if every whale had a little bit of every other whale? Pick
-                your parts and find out.
+                A little tidepool for unlikely creatures. Choose the pieces, soften
+                the edges, and see what swims into being.
               </p>
             </div>
             <div className="lab-grid">
@@ -483,6 +483,8 @@ function App() {
             </div>
           </div>
         </section>
+        }
+        {!labPage && <>
         <section className="sources wrap" id="sources">
           <details>
             <summary>
@@ -523,14 +525,9 @@ function App() {
               by.
             </p>
           </div>
-          <img
-            src={asset("whale-blueprint.svg")}
-            alt="Line drawing of a whale"
-            loading="lazy"
-            width="800"
-            height="400"
-          />
+          <LivingWhale />
         </section>
+        </>}
       </main>
       <footer>
         <div className="wrap footer-main">
@@ -550,7 +547,7 @@ function App() {
             >
               Unicode emoji chart ↗
             </a>
-            <a href="#sources">Specimen sources ↗</a>
+            <a href={asset("") + "#sources"}>Specimen sources ↗</a>
             <a
               href="https://github.com/roonil03/TheWhale"
               target="_blank"
@@ -573,3 +570,4 @@ function App() {
   );
 }
 createRoot(document.getElementById("root")).render(<App />);
+
