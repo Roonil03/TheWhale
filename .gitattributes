@@ -1,2 +1,4 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+# Keep downloaded SVG bytes stable for provenance checks on every platform.
+/public/whales/*.svg -text
