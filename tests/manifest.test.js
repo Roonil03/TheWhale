@@ -27,6 +27,16 @@ test("specimens have unique ids, attribution and existing local images", async (
     assert.match(specimen.file, /^\/whales\/[a-z0-9-]+\.(png|svg)$/);
     await access(path.join(publicDir, specimen.file.slice(1)));
   }
+  for (const id of [
+    "apple",
+    "google",
+    "whatsapp",
+    "facebook",
+    "twitter",
+    "openmoji",
+  ]) {
+    assert.ok(ids.has(id), `Missing original shared-recipe specimen: ${id}`);
+  }
 });
 
 test("all specimen artwork decodes, has visible pixels, and is visually distinct", async () => {
@@ -67,5 +77,38 @@ test("all specimen artwork decodes, has visible pixels, and is visually distinct
       `${specimen.id}: duplicates ${fingerprints.get(fingerprint)}`,
     );
     fingerprints.set(fingerprint, specimen.id);
+  }
+});
+
+test("scraped additions match their recorded code point, sources and original bytes", async () => {
+  const catalog = JSON.parse(
+    await readFile("docs/COLLECTION-SOURCES.json", "utf8"),
+  );
+  assert.equal(catalog.codepoint, "U+1F433");
+  const recorded = new Set();
+  for (const record of catalog.assets) {
+    assert.ok(
+      !recorded.has(record.id),
+      `Duplicate source record: ${record.id}`,
+    );
+    recorded.add(record.id);
+    const specimen = specimens.find((item) => item.id === record.id);
+    assert.ok(specimen, `Missing catalog specimen: ${record.id}`);
+    assert.equal(record.codepoint, "U+1F433");
+    assert.equal(record.file, specimen.file);
+    assert.equal(record.source, specimen.source);
+    assert.equal(new URL(record.assetUrl).protocol, "https:");
+    assert.ok(record.version && record.license && record.retrievedDate);
+    const bytes = await readFile(path.join(publicDir, specimen.file.slice(1)));
+    assert.equal(
+      createHash("sha256").update(bytes).digest("hex"),
+      record.sha256,
+    );
+  }
+  for (const specimen of specimens.slice(6)) {
+    assert.ok(
+      recorded.has(specimen.id),
+      `Missing scraped provenance: ${specimen.id}`,
+    );
   }
 });
