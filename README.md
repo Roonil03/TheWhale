@@ -17,6 +17,8 @@ Vite prints the local development URL. Run `npm run lint`, `npm test`, `npm run 
 
 The React application lives in `src/`; static specimens and their manifest live in `public/whales/`. The splice is rendered in the browser; it does not upload your creation to a server. Public assets are copied to `dist/`, and Vite emits fingerprinted JavaScript and CSS assets.
 
+The ESLint dependency tree temporarily overrides minimatch to version 11 for [GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249). Remove the overrides when ESLint and `@eslint/config-array` depend on a patched version; recheck linting when updating either dependency because this crosses a major version.
+
 ## Deployment
 
 In the repository settings, select **Pages → Build and deployment → GitHub Actions**. The workflow checks pull requests and pushes to `main`, then publishes `dist/` only after the checks pass on `main`. Vite's base path is `/TheWhale/`, matching this repository's project Pages URL. GitHub Pages controls HTTP caching headers; this repository does not configure custom response headers.
