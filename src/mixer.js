@@ -22,3 +22,29 @@ export function shareUrl(href, parts, softness) {
   url.searchParams.set("seam", softness);
   return url.href;
 }
+import { identityTransforms, normalizeTransforms } from "./editor-model.js";
+
+export function parseEditorRecipe(items, search = "") {
+  const mix = initialMix(items, search);
+  let transforms = identityTransforms();
+  try {
+    const encoded = new URLSearchParams(search).get("transforms");
+    if (encoded) transforms = normalizeTransforms(JSON.parse(encoded));
+  } catch {
+    // A malformed recipe still opens with its valid source and seam choices.
+  }
+  return { ...mix, transforms };
+}
+
+export function shareEditorUrl(href, state) {
+  const url = new URL(shareUrl(href, state.parts, state.softness));
+  const transforms = normalizeTransforms(state.transforms);
+  const identity = identityTransforms();
+  const changed = Object.fromEntries(
+    PARTS.filter((part) => JSON.stringify(transforms[part]) !== JSON.stringify(identity[part]))
+      .map((part) => [part, transforms[part]]),
+  );
+  if (Object.keys(changed).length) url.searchParams.set("transforms", JSON.stringify(changed));
+  else url.searchParams.delete("transforms");
+  return url.href;
+}

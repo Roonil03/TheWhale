@@ -82,3 +82,14 @@ test("real vendor artwork exports a decodable 600px PNG with transparent corners
     "the export should retain a transparent background",
   );
 });
+
+test("translated, scaled and rotated slices move their pixels after masking", () => {
+  const canvas = createCanvas(600, 600);
+  drawWhale(canvas, images, parts, 0, createCanvas, {
+    head: { x: 100, y: 0, scaleX: 0.5, scaleY: 0.5, rotation: 90 },
+  });
+  assert.equal(pixel(canvas, 10, 400)[3], 0);
+  assert.deepEqual(pixel(canvas, 180, 393), [0, 128, 0, 255]);
+  assert.deepEqual(pixel(canvas, 300, 500), [0, 0, 255, 255]);
+});
+

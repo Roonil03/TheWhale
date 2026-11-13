@@ -1,3 +1,5 @@
+import { PART_BOUNDS, normalizeTransform } from "./editor-model.js";
+
 /** Compose transparent vendor artwork into four deliberately experimental slices. */
 export function drawWhale(
   canvas,
@@ -5,6 +7,7 @@ export function drawWhale(
   parts,
   softness,
   createLayer = () => document.createElement("canvas"),
+  transforms = {},
 ) {
   const size = 600;
   const spoutHeight = 186;
@@ -13,7 +16,7 @@ export function drawWhale(
   canvas.width = canvas.height = size;
   const context = canvas.getContext("2d");
 
-  const paint = (image, x1, y1, x2, y2, soften) => {
+  const paint = (part, image, x1, y1, x2, y2, soften) => {
     const layer = createLayer(size, size);
     layer.width = layer.height = size;
     const layerContext = layer.getContext("2d");
@@ -42,11 +45,21 @@ export function drawWhale(
       layerContext.fillStyle = "#000";
     }
     layerContext.fillRect(x1, y1, x2 - x1, y2 - y1);
-    context.drawImage(layer, 0, 0);
+    const bounds = PART_BOUNDS[part];
+    const centerX = bounds.x + bounds.width / 2;
+    const centerY = bounds.y + bounds.height / 2;
+    const transform = normalizeTransform(transforms?.[part]);
+    context.save();
+    context.translate(centerX + transform.x, centerY + transform.y);
+    context.rotate(transform.rotation * Math.PI / 180);
+    context.scale(transform.scaleX, transform.scaleY);
+    context.drawImage(layer, -centerX, -centerY);
+    context.restore();
   };
 
-  paint(images[parts.head], 0, spoutHeight, third + feather, size, true);
+  paint("head", images[parts.head], 0, spoutHeight, third + feather, size, true);
   paint(
+    "body",
     images[parts.body],
     third - feather,
     spoutHeight,
@@ -54,6 +67,6 @@ export function drawWhale(
     size,
     true,
   );
-  paint(images[parts.tail], third * 2 - feather, spoutHeight, size, size, true);
-  paint(images[parts.spout], 0, 0, size, spoutHeight, false);
+  paint("tail", images[parts.tail], third * 2 - feather, spoutHeight, size, size, true);
+  paint("spout", images[parts.spout], 0, 0, size, spoutHeight, false);
 }
