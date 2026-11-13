@@ -1358,3 +1358,26 @@ footer {
     display: none;
   }
 }
+
+/* A little observatory for the whale's hidden-line portrait. */
+.living-whale { margin: 0; min-width: 0; }
+.living-whale-field { position: relative; display: grid; place-items: center; overflow: hidden; aspect-ratio: 1.48; border: 1px solid #ffffff24; border-radius: 48% 48% 44% 44%; background: radial-gradient(ellipse at 50% 65%, #13465b 0%, #0a2637 35%, #06141e 75%); box-shadow: inset 0 0 80px #0008, 0 36px 90px #00192345; perspective: 800px; }
+.living-whale-field::before { content: ""; position: absolute; inset: 12%; border: 1px solid #b0efff25; border-radius: 50%; transform: rotateX(65deg) rotate(-18deg); }
+.living-whale-field img, .living-whale-svg { position: relative; z-index: 1; width: 90%; height: auto; transform: scale(1.7); filter: drop-shadow(0 0 8px #6fe6ff72); }
+.living-whale-field img { opacity: .8; }
+.living-whale-svg polyline { fill: none; stroke: #a3ebf3; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: whale-draw 3.2s cubic-bezier(.2,.65,.2,1) forwards; }
+.orbit { position: absolute; width: 74%; height: 35%; border: 1px solid #9de8f52b; border-radius: 50%; transform: rotateX(65deg) rotate(-18deg); }
+.orbit-two { width: 92%; height: 52%; transform: rotateX(65deg) rotate(18deg); }
+.living-whale figcaption { display: flex; justify-content: space-between; gap: 1rem; margin-top: 1rem; font: 10px/1.5 monospace; letter-spacing: .08em; color: #8cabb7; }
+@keyframes whale-draw { to { stroke-dashoffset: 0; } }
+.lab-page .lab { min-height: calc(100vh - 80px); background: radial-gradient(ellipse at 8% 3%, #164c56 0%, transparent 40%), radial-gradient(ellipse at 92% 65%, #16394a 0%, transparent 35%), #071d28; }
+.lab-heading { padding-top: 2rem; }
+.lab-page .lab-preview { border-radius: 2rem; overflow: hidden; background: radial-gradient(ellipse at 50% 48%, #2f747c 0%, #174e58 39%, #092b38 85%); border: 1px solid #afe4d94d; box-shadow: inset 0 0 80px #00172070, 0 24px 65px #00141a55; }
+.lab-page .canvas-wrap { border-radius: 50%; background: radial-gradient(circle, #b8f5d521 0%, transparent 69%); }
+.lab-page .lab-controls { border-radius: 2rem; background: #e2f1de; color: #173d3a; box-shadow: 0 24px 60px #00141a33; }
+.lab-controls h3, .lab-controls .control-desc, .lab-controls .part-row, .lab-controls .seam { color: #173d3a; }
+.lab-controls select { color: #173d3a; background: #f4fbef; border-color: #8ab7a3; }
+.lab-controls .outline-light { color: #173d3a; border-color: #50796c; }
+.lab-controls .secondary-actions button { color: #275348; }
+@media (max-width: 600px) { .living-whale figcaption { font-size: 9px; } .lab-page .lab-preview { border-radius: 1.5rem; } }
+@media (prefers-reduced-motion: reduce) { .living-whale-svg polyline { animation: none; stroke-dashoffset: 0; } }
