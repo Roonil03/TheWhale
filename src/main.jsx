@@ -69,7 +69,8 @@ function App() {
     [exportUrl],
   );
   useEffect(() => {
-    fetch(asset("whales/manifest.json"))
+    // Revalidate the collection after Pages releases while retaining HTTP caching.
+    fetch(asset("whales/manifest.json"), { cache: "no-cache" })
       .then((r) => {
         if (!r.ok) throw Error();
         return r.json();
@@ -96,7 +97,7 @@ function App() {
   const filtered = useMemo(
     () =>
       items.filter((item) =>
-        item.name.toLowerCase().includes(query.trim().toLowerCase()),
+        `${item.name} ${item.version}`.toLowerCase().includes(query.trim().toLowerCase()),
       ),
     [items, query],
   );

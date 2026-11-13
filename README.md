@@ -2,7 +2,7 @@
 
 A field guide to the spouting whale emoji, with a browser-based splice lab for combining specimens. The deployed site is at [roonil03.github.io/TheWhale/](https://roonil03.github.io/TheWhale/).
 
-Dark mode is the default. Use the header theme button for light mode; your choice stays in this browser. Search the six-platform collection, load a specimen into the lab, then choose its spout, head, body and tail independently. The lab exports a transparent PNG and creates a URL that restores the recipe.
+Dark mode is the default. Use the header theme button for light mode; your choice stays in this browser. Search twenty current and historical renderings by platform or version, load a specimen into the lab, then choose its spout, head, body and tail independently. The lab exports a transparent PNG and creates a URL that restores the recipe.
 
 ## Develop
 
