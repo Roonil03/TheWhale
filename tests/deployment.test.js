@@ -85,3 +85,64 @@ test("Pages deployment cancels after the polling timeout", async () => {
   );
   assert.equal(cancelled, true);
 });
+
+test("Pages status polling recovers from eventual consistency and transient failures", async () => {
+  let polls = 0;
+  const request = async (url, options) => {
+    if (url === env.ACTIONS_ID_TOKEN_REQUEST_URL)
+      return response({ value: "oidc-secret" });
+    if (options.method === "POST")
+      return response({ id: "123", page_url: "https://example.com/" });
+    polls++;
+    if (polls === 1) return { ok: false, status: 404 };
+    if (polls === 2) return { ok: false, status: 503 };
+    if (polls === 3) throw new TypeError("temporary network failure");
+    return response({
+      status: polls === 4 ? "deployment_attempt_error" : "succeed",
+    });
+  };
+  assert.equal(
+    await deployPages(env, request, async () => {}),
+    "https://example.com/",
+  );
+  assert.equal(polls, 5);
+});
+
+test("Pages status polling cancels after repeated transient errors", async () => {
+  let polls = 0;
+  let cancelled = false;
+  const request = async (url, options) => {
+    if (url === env.ACTIONS_ID_TOKEN_REQUEST_URL)
+      return response({ value: "oidc-secret" });
+    if (url.endsWith("/cancel")) {
+      cancelled = true;
+      return response({});
+    }
+    if (options.method === "POST")
+      return response({ id: "123", page_url: "https://example.com/" });
+    polls++;
+    return { ok: false, status: 503 };
+  };
+  await assert.rejects(
+    deployPages(env, request, async () => {}),
+    /repeated transient errors/,
+  );
+  assert.equal(polls, 6);
+  assert.equal(cancelled, true);
+});
+
+test("Pages status polling fails immediately for a permanent authorization error", async () => {
+  let calls = 0;
+  const request = async () => {
+    calls++;
+    if (calls === 1) return response({ value: "oidc-secret" });
+    if (calls === 2)
+      return response({ id: "123", page_url: "https://example.com/" });
+    return { ok: false, status: 403 };
+  };
+  await assert.rejects(
+    deployPages(env, request, async () => {}),
+    /HTTP 403/,
+  );
+  assert.equal(calls, 3);
+});

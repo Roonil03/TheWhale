@@ -37,8 +37,14 @@ export async function deployPages(
       ...options,
       signal: AbortSignal.timeout(30000),
     });
-    if (!response.ok)
-      throw new Error(`Pages request failed (HTTP ${response.status})`);
+    if (!response.ok) {
+      throw Object.assign(
+        new Error(`Pages request failed (HTTP ${response.status})`),
+        {
+          status: response.status,
+        },
+      );
+    }
     return response.json();
   }
   const oidc = await json(oidcUrl, {
@@ -74,19 +80,64 @@ export async function deployPages(
     throw new Error("Invalid Pages deployment response");
   }
   const statusUrl = `${base}/${id}`;
+  const cancel = async () => {
+    try {
+      await request(`${statusUrl}/cancel`, {
+        method: "POST",
+        headers,
+        signal: AbortSignal.timeout(30000),
+      });
+    } catch {
+      // Best effort only; the original failure still fails the job below.
+    }
+  };
+  let transientErrors = 0;
   const deadline = Date.now() + 10 * 60 * 1000;
   for (let attempt = 0; attempt < 120 && Date.now() < deadline; attempt++) {
-    const { status } = await json(statusUrl, { headers });
+    let status;
+    try {
+      ({ status } = await json(statusUrl, { headers }));
+    } catch (error) {
+      const httpStatus = error?.status;
+      if (
+        httpStatus &&
+        ![404, 408, 429].includes(httpStatus) &&
+        httpStatus < 500
+      ) {
+        throw error;
+      }
+      transientErrors++;
+      if (transientErrors >= 6) {
+        await cancel();
+        throw new Error(
+          "Pages status polling failed after repeated transient errors",
+          { cause: error },
+        );
+      }
+      await delay(5000);
+      continue;
+    }
     if (status === "succeed") return deployment.page_url;
     if (failures.has(status))
       throw new Error(`Pages deployment failed: ${status}`);
+    if (
+      ["unknown_status", "not_found", "deployment_attempt_error"].includes(
+        status,
+      )
+    ) {
+      transientErrors++;
+      if (transientErrors >= 6) {
+        await cancel();
+        throw new Error(
+          "Pages status polling failed after repeated transient errors",
+        );
+      }
+    } else {
+      transientErrors = 0;
+    }
     await delay(5000);
   }
-  await request(`${statusUrl}/cancel`, {
-    method: "POST",
-    headers,
-    signal: AbortSignal.timeout(30000),
-  });
+  await cancel();
   throw new Error("Pages deployment timed out");
 }
 
