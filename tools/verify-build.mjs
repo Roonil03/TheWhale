@@ -18,17 +18,33 @@ assert.match(
 assert.match(html, /<script type="application\/ld\+json">/);
 
 const labHtml = await readFile(path.join(dist, "lab.html"), "utf8");
+const pageTitle = (contents) => contents.match(/<title>([^<]+)<\/title>/)?.[1];
+assert.ok(pageTitle(labHtml), "Missing lab page title");
+assert.notEqual(
+  pageTitle(labHtml),
+  pageTitle(html),
+  "Lab needs its own page title",
+);
 assert.match(
   labHtml,
   /<link rel="canonical" href="https:\/\/roonil03\.github\.io\/TheWhale\/lab\.html"/,
 );
 
-for (const [page, contents] of [["index.html", html], ["lab.html", labHtml]]) {
-  const bundles = [...contents.matchAll(/(?:src|href)="([^"]+\.(?:js|css))"/g)].map(
-    (match) => match[1],
+for (const [page, contents] of [
+  ["index.html", html],
+  ["lab.html", labHtml],
+]) {
+  const bundles = [
+    ...contents.matchAll(/(?:src|href)="([^"]+\.(?:js|css))"/g),
+  ].map((match) => match[1]);
+  assert.ok(
+    bundles.some((url) => url.endsWith(".js")),
+    `Missing JavaScript bundle in ${page}`,
   );
-  assert.ok(bundles.some((url) => url.endsWith(".js")), `Missing JavaScript bundle in ${page}`);
-  assert.ok(bundles.some((url) => url.endsWith(".css")), `Missing stylesheet in ${page}`);
+  assert.ok(
+    bundles.some((url) => url.endsWith(".css")),
+    `Missing stylesheet in ${page}`,
+  );
   for (const url of bundles) {
     assert.ok(
       url.startsWith(`${base}assets/`),

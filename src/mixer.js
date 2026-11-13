@@ -41,10 +41,13 @@ export function shareEditorUrl(href, state) {
   const transforms = normalizeTransforms(state.transforms);
   const identity = identityTransforms();
   const changed = Object.fromEntries(
-    PARTS.filter((part) => JSON.stringify(transforms[part]) !== JSON.stringify(identity[part]))
-      .map((part) => [part, transforms[part]]),
+    PARTS.filter(
+      (part) =>
+        JSON.stringify(transforms[part]) !== JSON.stringify(identity[part]),
+    ).map((part) => [part, transforms[part]]),
   );
-  if (Object.keys(changed).length) url.searchParams.set("transforms", JSON.stringify(changed));
+  if (Object.keys(changed).length)
+    url.searchParams.set("transforms", JSON.stringify(changed));
   else url.searchParams.delete("transforms");
   return url.href;
 }

@@ -51,13 +51,21 @@ export function drawWhale(
     const transform = normalizeTransform(transforms?.[part]);
     context.save();
     context.translate(centerX + transform.x, centerY + transform.y);
-    context.rotate(transform.rotation * Math.PI / 180);
+    context.rotate((transform.rotation * Math.PI) / 180);
     context.scale(transform.scaleX, transform.scaleY);
     context.drawImage(layer, -centerX, -centerY);
     context.restore();
   };
 
-  paint("head", images[parts.head], 0, spoutHeight, third + feather, size, true);
+  paint(
+    "head",
+    images[parts.head],
+    0,
+    spoutHeight,
+    third + feather,
+    size,
+    true,
+  );
   paint(
     "body",
     images[parts.body],
@@ -67,6 +75,14 @@ export function drawWhale(
     size,
     true,
   );
-  paint("tail", images[parts.tail], third * 2 - feather, spoutHeight, size, size, true);
+  paint(
+    "tail",
+    images[parts.tail],
+    third * 2 - feather,
+    spoutHeight,
+    size,
+    size,
+    true,
+  );
   paint("spout", images[parts.spout], 0, 0, size, spoutHeight, false);
 }

@@ -92,4 +92,3 @@ test("translated, scaled and rotated slices move their pixels after masking", ()
   assert.deepEqual(pixel(canvas, 180, 393), [0, 128, 0, 255]);
   assert.deepEqual(pixel(canvas, 300, 500), [0, 0, 255, 255]);
 });
-
