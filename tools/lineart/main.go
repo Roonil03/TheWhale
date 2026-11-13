@@ -40,8 +40,6 @@ func main() {
 	paths := scene.Render(ln.Vector{-5, -8, 5}, ln.Vector{.3, 0, 0}, ln.Vector{0, 0, 1}, 900, 420, 38, .1, 100, .025)
 	output := "../../public/whale-blueprint.svg"
 	paths.WriteToSVG(output, 900, 420)
-	// Raster fallback for social crawlers that cannot display SVG previews.
-	paths.WriteToPNG("../../public/og.png", 900, 420)
 	data, err := os.ReadFile(output)
 	if err != nil {
 		panic(err)
