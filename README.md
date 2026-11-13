@@ -12,6 +12,8 @@ Undo and Redo retain up to fifty edits, including source changes, seam adjustmen
 
 PNG export contains the transparent 600×600 canvas, without selection outlines or controls. Parts outside the canvas are clipped. Share links retain sources, seam strength and transforms; older source-only recipes still open correctly. The home gallery links into this dedicated editor and does not load its interaction code until needed.
 
+The lab requests only the distinct artwork selected in the recipe and reuses loaded images when revisiting a source. The default recipe needs four image files (50,533 source bytes), rather than all twenty (620,277 source bytes). These are file sizes before HTTP compression, not measured network transfer sizes. Failed sources offer an explicit retry. Each editor caches at most four masked canvas slices, so transform-only redraws allocate no new masking canvases; changing a source remasks its slice, while changing seam strength remasks the three lower slices. Pointer updates follow animation frames and commit the final release position as one undoable edit.
+
 ## Develop
 
 Use Node.js 22.22 or newer in the Node 22 line, or Node.js 24.8 or newer, and npm:

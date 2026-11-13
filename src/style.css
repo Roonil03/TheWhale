@@ -1079,6 +1079,7 @@ footer {
   margin: 0;
   min-width: 0;
 }
+
 .living-whale-field {
   position: relative;
   display: grid;
@@ -1098,6 +1099,7 @@ footer {
     0 36px 90px #00192345;
   perspective: 800px;
 }
+
 .living-whale-field::before {
   content: "";
   position: absolute;
@@ -1106,6 +1108,7 @@ footer {
   border-radius: 50%;
   transform: rotateX(65deg) rotate(-18deg);
 }
+
 .living-whale-field img,
 .living-whale-svg {
   position: relative;
@@ -1115,9 +1118,11 @@ footer {
   transform: scale(1.7);
   filter: drop-shadow(0 0 8px #6fe6ff72);
 }
+
 .living-whale-field img {
   opacity: 0.8;
 }
+
 .living-whale-svg polyline {
   fill: none;
   stroke: #a3ebf3;
@@ -1128,6 +1133,7 @@ footer {
   stroke-dashoffset: 1;
   animation: whale-draw 3.2s cubic-bezier(0.2, 0.65, 0.2, 1) forwards;
 }
+
 .orbit {
   position: absolute;
   width: 74%;
@@ -1136,11 +1142,13 @@ footer {
   border-radius: 50%;
   transform: rotateX(65deg) rotate(-18deg);
 }
+
 .orbit-two {
   width: 92%;
   height: 52%;
   transform: rotateX(65deg) rotate(18deg);
 }
+
 .living-whale figcaption {
   display: flex;
   justify-content: space-between;
