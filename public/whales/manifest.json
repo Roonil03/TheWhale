@@ -1,8 +1,18 @@
 [
-  {"id":"apple","name":"Apple","file":"/whales/apple.png","source":"https://github.com/iamcal/emoji-data/tree/master/img-apple-160","license":"Apple artwork; not licensed for commercial use by source","version":"macOS 15.5"},
-  {"id":"google","name":"Google","file":"/whales/google.png","source":"https://github.com/iamcal/emoji-data/tree/master/img-google-136","license":"Apache-2.0","version":"Noto Emoji v2.048"},
-  {"id":"whatsapp","name":"WhatsApp","file":"/whales/whatsapp.png","source":"https://emojipedia.org/whatsapp/2.23.2.72/spouting-whale","license":"WhatsApp artwork; reuse rights not established","version":"WhatsApp 2.23.2.72"},
-  {"id":"facebook","name":"Facebook","file":"/whales/facebook.png","source":"https://github.com/iamcal/emoji-data/tree/master/img-facebook-96","license":"Facebook artwork; license unclear","version":"v9, fetched 2024-02-05"},
-  {"id":"twitter","name":"Twitter","file":"/whales/twitter.png","source":"https://github.com/iamcal/emoji-data/tree/master/img-twitter-72","license":"CC BY 4.0","version":"Twemoji fork v16.0.1"},
-  {"id":"openmoji","name":"OpenMoji","file":"/whales/openmoji.svg","source":"https://github.com/hfg-gmuend/openmoji/blob/master/color/svg/1F433.svg","license":"CC BY-SA 4.0","version":"upstream master, retrieved 2026-11-13"}
+  {
+    "id": "google",
+    "name": "Google",
+    "file": "/whales/google.png",
+    "source": "https://github.com/iamcal/emoji-data/tree/master/img-google-136",
+    "license": "Apache-2.0; Google Noto Emoji authors",
+    "version": "Noto Emoji v2.048"
+  },
+  {
+    "id": "twitter",
+    "name": "Twitter",
+    "file": "/whales/twitter.png",
+    "source": "https://github.com/iamcal/emoji-data/tree/master/img-twitter-72",
+    "license": "CC BY 4.0; Twitter, Inc. and other contributors",
+    "version": "Twemoji fork v16.0.1"
+  }
 ]
