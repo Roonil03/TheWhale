@@ -17,32 +17,39 @@ assert.match(
 );
 assert.match(html, /<script type="application\/ld\+json">/);
 
-const bundles = [...html.matchAll(/(?:src|href)="([^"]+\.(?:js|css))"/g)].map(
-  (match) => match[1],
+const labHtml = await readFile(path.join(dist, "lab.html"), "utf8");
+assert.match(
+  labHtml,
+  /<link rel="canonical" href="https:\/\/roonil03\.github\.io\/TheWhale\/lab\.html"/,
 );
-assert.ok(
-  bundles.some((url) => url.endsWith(".js")),
-  "Missing JavaScript bundle",
-);
-assert.ok(
-  bundles.some((url) => url.endsWith(".css")),
-  "Missing stylesheet",
-);
-for (const url of bundles) {
-  assert.ok(
-    url.startsWith(`${base}assets/`),
-    `Invalid Pages asset URL: ${url}`,
+
+for (const [page, contents] of [["index.html", html], ["lab.html", labHtml]]) {
+  const bundles = [...contents.matchAll(/(?:src|href)="([^"]+\.(?:js|css))"/g)].map(
+    (match) => match[1],
   );
-  await access(path.join(dist, url.slice(base.length)));
+  assert.ok(bundles.some((url) => url.endsWith(".js")), `Missing JavaScript bundle in ${page}`);
+  assert.ok(bundles.some((url) => url.endsWith(".css")), `Missing stylesheet in ${page}`);
+  for (const url of bundles) {
+    assert.ok(
+      url.startsWith(`${base}assets/`),
+      `Invalid Pages asset URL: ${url}`,
+    );
+    await access(path.join(dist, url.slice(base.length)));
+  }
 }
 
 for (const asset of [
   "favicon.svg",
   "og.png",
   "fonts/space-grotesk-latin.woff2",
+  "whale-blueprint.svg",
+  "wasm/whale-worker.js",
+  "wasm/wasm_exec.js",
 ]) {
   await access(path.join(dist, asset));
 }
+const wasm = await readFile(path.join(dist, "wasm/whale.wasm"));
+assert.ok(WebAssembly.validate(wasm), "Invalid built whale WebAssembly module");
 const specimens = JSON.parse(
   await readFile(path.join(dist, "whales/manifest.json"), "utf8"),
 );
