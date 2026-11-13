@@ -27,6 +27,8 @@ The pull request template is adapted from [go-sql-driver/mysql](https://github.c
 
 ## Project skills and provenance
 
-Codex discovers the converted project skills in `.agents/skills/`. [Source application](docs/SKILL-APPLICATION.md) records the concrete use of each requested reference; [design decisions](docs/DESIGN.md) explains the single animation choice and production tradeoffs. [Artwork provenance](docs/ASSETS.md) records vendor versions, sources and separate licensing terms. The project license does not relicense vendor artwork.
+The converted Codex skills are installed locally in `.agents/skills/` and deliberately excluded from Git. [Source application](docs/SKILL-APPLICATION.md) records the concrete use of each requested reference; [design decisions](docs/DESIGN.md) explains the single animation choice and production tradeoffs. [Artwork provenance](docs/ASSETS.md) records vendor versions, sources and separate licensing terms. The project license does not relicense vendor artwork.
 
 The tests also render the actual compositor offline and decode its PNG output, checking source regions, softened boundaries and transparency. The canvas test library is a development dependency and is excluded from the website bundle.
+
+Pages publication uses GitHub's deployment REST API and the runner's short-lived OIDC token. The small dependency-free deployment client replaces the upstream action's deprecated dependency and fails on API errors, terminal deployment failures, or a bounded timeout; its state transitions are tested. Tokens stay in memory and are never printed.
