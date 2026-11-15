@@ -1,6 +1,6 @@
 # Design decisions
 
-The Whale is an unofficial specimen collection and a playful image collage tool. Ocean ink, deep-blue surfaces, ice text, cyan and a small acid-yellow accent give the default dark gallery a marine field-guide character. An explicit light-mode option uses ice white, navy and cobalt. The selected mode persists locally and is applied before the first paint, with dark as the default even on a light operating system. Space Grotesk supplies the main type; system monospace labels evoke specimen notes without adding another font request.
+The Whale is an unofficial specimen collection and a playful image collage tool. Ocean ink, deep-blue surfaces, ice text, cyan and a small acid-yellow accent give the default dark gallery a marine field-guide character. An explicit light-mode option uses ice white, navy and cobalt. The selected mode persists locally and is applied before the first paint, with dark as the default even on a light operating system. Type is limited to two families: DM Sans for headings and text, and DM Mono for small labels, counts and numeric inputs. All icons are Lucide.
 
 ## Animation reel review
 
@@ -32,8 +32,8 @@ The static whale blueprint is generated with fogleman/ln. It is an illustration,
 
 ## Production choices
 
-React and Vite provide a static build. Vite minifies production CSS and JavaScript; there is no additional minifier or animation runtime. The main variable font is hosted locally and is the only preloaded font. Vendor images retain transparency, so small source PNGs and the OpenMoji SVG are retained rather than forced through a lossy conversion. Meaningful images have alternative text, and the blueprint is lazy loaded.
+React and Vite provide a static build. Vite minifies production CSS and JavaScript; there is no additional minifier or animation runtime. Both fonts are bundled and served locally. Vendor images retain transparency. Originals are never recompressed. Vector sources are used where the documented version publishes them. The gallery grid loads WebP display copies of the four large non-animated rasters (see `docs/ASSETS.md`), and the lab loads the originals. Meaningful images have alternative text, and the blueprint is lazy loaded.
 
-One local manifest request supplies the collection. There are no third-party API requests, analytics, accounts or uploads. A loading skeleton appears only during that manifest request. The app is small enough that a separate code chunk for the mixer would add a loading boundary without materially reducing its React runtime. Hashed JS/CSS filenames provide cache invalidation; GitHub Pages sets the actual HTTP caching policy.
+The collection is bundled at build time from `public/whales/manifest.json`, so specimens render without a runtime request. There are no third-party API requests, analytics, accounts or uploads. The lab is a separate chunk that `lab.html` preloads; the home page never loads it. The lab canvas renders and exports at 1200 × 1200. Hashed JS/CSS filenames provide cache invalidation; GitHub Pages sets the actual HTTP caching policy.
 
 The single-page structure uses section links rather than artificial breadcrumbs. Metadata includes a canonical URL, title, description, raster social preview and an Organization publisher within WebSite structured data. Source and licensing details are available in the page and in `ASSETS.md`.
