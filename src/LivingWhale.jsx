@@ -35,15 +35,15 @@ export function LivingWhale() {
   return (
     <figure className="living-whale" ref={figure} aria-label="A line drawing of a spouting whale">
       <div className="living-whale-field" aria-hidden="true">
+        <span className="living-whale-grid" />
         <span className="orbit orbit-one" />
         <span className="orbit orbit-two" />
         {paths ? <svg className="living-whale-svg" viewBox="0 0 900 420" role="presentation">
           <g transform="translate(0 420) scale(1 -1)">
             {paths.map((points, index) => <polyline key={index} points={points} pathLength="1" />)}
           </g>
-        </svg> : <img src={`${base}whale-blueprint.svg`} alt="" width="900" height="420" />}
+        </svg> : <img src={`${base}whale-blueprint.svg`} alt="" width="900" height="420" loading="lazy" decoding="async" />}
       </div>
-      <figcaption><span>FIG. 01 / A WHALE, IN LINES</span><span>BUILT FROM LIGHT &amp; IMAGINATION</span></figcaption>
     </figure>
   );
 }
