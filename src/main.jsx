@@ -130,6 +130,7 @@ function App() {
           >
             Splice lab
           </a>
+          <a href={asset("game/")}>Race</a>
         </nav>
         <button
           className="theme-toggle"

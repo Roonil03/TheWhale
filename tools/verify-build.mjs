@@ -30,9 +30,13 @@ assert.match(
   /<link rel="canonical" href="https:\/\/roonil03\.github\.io\/TheWhale\/lab\.html"/,
 );
 
+const gameHtml = await readFile(path.join(dist, "game/index.html"), "utf8");
+assert.match(gameHtml, /<title>Race the whale \| The Whale<\/title>/);
+
 for (const [page, contents] of [
   ["index.html", html],
   ["lab.html", labHtml],
+  ["game/index.html", gameHtml],
 ]) {
   const bundles = [
     ...contents.matchAll(/(?:src|href)="([^"]+\.(?:js|css))"/g),
@@ -55,7 +59,10 @@ for (const [page, contents] of [
   const font = contents.match(
     /<link rel="preload" href="([^"]+\.woff2)" as="font" type="font\/woff2" crossorigin>/,
   )?.[1];
-  assert.ok(font?.startsWith(`${base}assets/`), `Missing font preload in ${page}`);
+  assert.ok(
+    font?.startsWith(`${base}assets/`),
+    `Missing font preload in ${page}`,
+  );
   await access(path.join(dist, font.slice(base.length)));
 }
 const labModule = labHtml.match(
@@ -74,7 +81,11 @@ assert.doesNotMatch(
   "The home page must not preload the lab",
 );
 
+assert.doesNotMatch(html, /abyssal-engine|game-[\w-]+\.js/);
+assert.doesNotMatch(labHtml, /abyssal-engine|game-[\w-]+\.js/);
+
 for (const asset of [
+  "game-notices.txt",
   "favicon.svg",
   "og.png",
   "whale-blueprint.svg",

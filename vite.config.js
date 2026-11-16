@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { abyssalEngine, gameRoutes } from "./tools/game-plugin.mjs";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
@@ -88,6 +89,14 @@ function criticalPreloads() {
 
 export default defineConfig({
   base: "/TheWhale/",
-  plugins: [react(), whaleManifest(), criticalPreloads()],
-  build: { rollupOptions: { input: ["index.html", "lab.html"] } },
+  plugins: [
+    react(),
+    whaleManifest(),
+    criticalPreloads(),
+    abyssalEngine(),
+    gameRoutes(),
+  ],
+  build: {
+    rollupOptions: { input: ["index.html", "lab.html", "game/index.html"] },
+  },
 });

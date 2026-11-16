@@ -44,3 +44,11 @@ The tests also render the actual compositor offline and decode its PNG output, c
 Pages publication uses GitHub's deployment REST API and the runner's short-lived OIDC token. The small dependency-free deployment client replaces the upstream action's deprecated dependency and fails on API errors, terminal deployment failures, or a bounded timeout; its state transitions are tested. Tokens stay in memory and are never printed.
 
 The splice lab lives at `lab.html`; legacy recipe links redirect there. The home-page whale is a hidden-line 3D scene rendered on first visibility by `ln` compiled to WebAssembly, in a short-lived worker. A pre-rendered SVG remains available if workers or WebAssembly fail, and for reduced-motion preferences. The checked-in WASM was built with Go 1.27.1: from `tools/lineart`, run `GOOS=js GOARCH=wasm go build -trimpath -ldflags="-s -w" -o ../../public/wasm/whale.wasm ./wasm`, and copy the matching Go `lib/wasm/wasm_exec.js` to `public/wasm/`.
+
+## Whale race
+
+The local `game/` route adds a race between two whales through [Abyssal Garden](https://github.com/Noniv/abyssal-garden). You swim as a pale lime humpback against a larger blue-black rival; both are the same procedural mesh from `src/game/whale-mesh.js`, animated in the racer shader, with no downloaded models. The procedural WebGPU world is adapted from revision `a596354eff400d458bc2aeb9bdf5e0a9734b2bcf` by Maksymilian Dendura, under the MIT license. Source and license are retained in `src/game/vendor/abyssal/`.
+
+The game has its own entry point, so the gallery and splice lab do not load the renderer. WebGPU requires a supported browser and a secure context, either HTTPS or localhost.
+
+Hold `W` to swim along your current heading and `Shift` to boost. Turn with `A`/`D` and pitch up or down with the arrow keys. Your heading stays where you leave it, so you must steer around bends and rocks. Switch between chase, first-person, side, and overhead cameras with `C` or `1`–`4`. `P` or Escape pauses. Phones supply thrust automatically, with a steering pad, a Swim toggle and hold-to-Boost. Steer through the rings to recover stamina and gain a short surge. Missing a ring causes brief turbulence; the next ring is a fresh chance. The marked course follows the original world's flythrough.
