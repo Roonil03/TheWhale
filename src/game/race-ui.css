@@ -1,0 +1,1282 @@
+/*
+ * Race HUD. Every selector starts at .race-ui, so nothing here reaches the
+ * canvas or the rest of the site. The HUD is always dark because it sits on
+ * an underwater scene, whatever theme the gallery uses.
+ */
+
+.race-ui {
+  --race-sans: "DM Sans Variable", sans-serif;
+  --race-mono: "DM Mono", monospace;
+  --race-ink: #eaf4f3;
+  --race-muted: #b4c8d0;
+  --race-deep: #07141e;
+  --race-glass: rgb(7 20 30 / 56%);
+  --race-glass-strong: rgb(6 17 26 / 84%);
+  --race-glass-hover: rgb(20 44 58 / 72%);
+  --race-ghost: rgb(7 20 30 / 30%);
+  --race-line: rgb(163 235 243 / 18%);
+  --race-line-strong: rgb(163 235 243 / 38%);
+  --race-cyan: #6bd8ef;
+  --race-lime: #d9ee7a;
+  --race-on-lime: #102b31;
+  --race-warn: #ffa795;
+  --race-blur: blur(14px) saturate(140%);
+  --race-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --race-edge: 12px;
+
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  padding: max(var(--race-edge), env(safe-area-inset-top))
+    max(var(--race-edge), env(safe-area-inset-right))
+    max(var(--race-edge), env(safe-area-inset-bottom))
+    max(var(--race-edge), env(safe-area-inset-left));
+  overflow: hidden;
+  pointer-events: none;
+  font-family: var(--race-sans);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--race-ink);
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  font-synthesis: none;
+}
+
+.race-ui,
+.race-ui *,
+.race-ui *::before,
+.race-ui *::after {
+  box-sizing: border-box;
+}
+
+.race-ui [hidden] {
+  display: none !important;
+}
+
+/* Soft shade behind the top and bottom rows so text holds over bright water. */
+.race-ui::before,
+.race-ui::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 140px;
+  pointer-events: none;
+}
+
+.race-ui::before {
+  top: 0;
+  background: linear-gradient(rgb(4 12 18 / 46%), transparent);
+}
+
+.race-ui::after {
+  bottom: 0;
+  background: linear-gradient(transparent, rgb(4 12 18 / 46%));
+}
+
+.race-ui .race-icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+.race-ui .race-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.race-ui :focus-visible {
+  outline: 2px solid var(--race-cyan);
+  outline-offset: 2px;
+}
+
+/* ---------- Scrim ---------- */
+
+.race-ui .race-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  background: radial-gradient(
+    120% 90% at 50% 45%,
+    rgb(4 12 18 / 30%),
+    rgb(4 12 18 / 72%)
+  );
+}
+
+.race-ui[data-phase="loading"] .race-scrim,
+.race-ui[data-phase="error"] .race-scrim {
+  background: radial-gradient(120% 90% at 50% 30%, #0c2532, var(--race-deep));
+}
+
+/* ---------- Buttons ---------- */
+
+.race-ui .race-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 16px;
+  border: 1px solid var(--race-line);
+  border-radius: 12px;
+  background: var(--race-glass);
+  backdrop-filter: var(--race-blur);
+  color: var(--race-ink);
+  font: inherit;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  pointer-events: auto;
+  appearance: none;
+  transition:
+    background-color 0.18s var(--race-ease),
+    border-color 0.18s var(--race-ease),
+    transform 0.18s var(--race-ease);
+}
+
+.race-ui .race-btn:active {
+  transform: scale(0.97);
+}
+
+.race-ui .race-btn--icon {
+  width: 44px;
+  padding: 0;
+}
+
+.race-ui .race-btn--primary {
+  min-height: 48px;
+  padding: 0 24px;
+  border-color: transparent;
+  background: var(--race-lime);
+  backdrop-filter: none;
+  color: var(--race-on-lime);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+@media (hover: hover) {
+  .race-ui .race-btn:hover {
+    border-color: var(--race-line-strong);
+    background: var(--race-glass-hover);
+  }
+
+  .race-ui .race-btn--primary:hover {
+    border-color: transparent;
+    background: #e6f797;
+  }
+
+  .race-ui .race-controls-summary:hover {
+    color: var(--race-ink);
+  }
+}
+
+/* ---------- Top bar ---------- */
+
+.race-ui .race-top {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 520px) 1fr;
+  grid-template-areas: "back readout actions";
+  align-items: start;
+  gap: 12px;
+}
+
+.race-ui .race-back {
+  grid-area: back;
+  justify-self: start;
+  padding: 0 16px 0 12px;
+}
+
+.race-ui .race-top-actions {
+  grid-area: actions;
+  display: flex;
+  gap: 8px;
+  justify-self: end;
+}
+
+.race-ui .race-readout {
+  grid-area: readout;
+  display: grid;
+  gap: 8px;
+  padding: 12px 16px;
+  border: 1px solid var(--race-line);
+  border-radius: 16px;
+  background: var(--race-glass);
+  backdrop-filter: var(--race-blur);
+}
+
+.race-ui[data-phase="paused"] .race-readout,
+.race-ui[data-phase="finished"] .race-readout {
+  opacity: 0.6;
+}
+
+.race-ui .race-readout-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 20px;
+}
+
+.race-ui .race-timer {
+  font-family: var(--race-mono);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.race-ui .race-remaining {
+  font-family: var(--race-mono);
+  font-size: 13px;
+  color: var(--race-muted);
+  white-space: nowrap;
+}
+
+.race-ui .race-lead {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.race-ui .race-lead[data-side="ahead"] {
+  color: var(--race-lime);
+}
+
+.race-ui .race-lead[data-side="behind"] {
+  color: var(--race-cyan);
+}
+
+.race-ui .race-key {
+  display: flex;
+  gap: 12px;
+  font-family: var(--race-mono);
+  font-size: 12px;
+  color: var(--race-muted);
+}
+
+.race-ui .race-key-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.race-ui .race-key-item::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.race-ui .race-key-item--you::before {
+  background: var(--race-lime);
+}
+
+.race-ui .race-key-item--whale::before {
+  border: 2px solid var(--race-cyan);
+}
+
+/* Course strip. The finish is the bar at the right end. */
+.race-ui .race-track {
+  position: relative;
+  height: 16px;
+  margin: 0 6px;
+}
+
+.race-ui .race-track-line {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: 2px;
+  margin-top: -1px;
+  border-radius: 1px;
+  background:
+    linear-gradient(90deg, var(--race-line-strong) 0 1px, transparent 1px) 0 0 /
+      25% 100%,
+    rgb(234 244 243 / 20%);
+}
+
+.race-ui .race-track-finish {
+  position: absolute;
+  top: 0;
+  right: -1px;
+  width: 3px;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--race-ink);
+}
+
+.race-ui .race-marker {
+  position: absolute;
+  inset: 0;
+  transform: translateX(calc(var(--race-p, 0) * 100%));
+  will-change: transform;
+}
+
+.race-ui .race-marker-dot {
+  position: absolute;
+  top: 50%;
+  left: -6px;
+  width: 12px;
+  height: 12px;
+  margin-top: -6px;
+  border-radius: 50%;
+}
+
+.race-ui .race-marker--you .race-marker-dot {
+  background: var(--race-lime);
+  box-shadow: 0 0 0 3px rgb(217 238 122 / 22%);
+}
+
+.race-ui .race-marker--whale .race-marker-dot {
+  border: 2px solid var(--race-cyan);
+  background: var(--race-deep);
+}
+
+/* ---------- Countdown ---------- */
+
+.race-ui .race-countdown {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.race-ui .race-countdown-num {
+  font-family: var(--race-mono);
+  font-size: clamp(96px, 24vmin, 200px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  text-shadow: 0 4px 32px rgb(4 12 18 / 60%);
+  animation: race-count 0.9s var(--race-ease) both;
+}
+
+.race-ui .race-countdown-num--go {
+  color: var(--race-lime);
+  animation-name: race-go;
+}
+
+@keyframes race-count {
+  0% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+
+  30% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0.85;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes race-go {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+
+/* ---------- Panels ---------- */
+
+.race-ui .race-stage {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+}
+
+.race-ui .race-panel {
+  width: min(100%, 440px);
+  max-height: 100%;
+  padding: 32px;
+  overflow-y: auto;
+  border: 1px solid var(--race-line);
+  border-radius: 16px;
+  background: var(--race-glass-strong);
+  backdrop-filter: blur(24px) saturate(140%);
+  box-shadow: 0 24px 64px rgb(2 8 12 / 50%);
+  pointer-events: auto;
+  overscroll-behavior: contain;
+  animation: race-rise 0.4s var(--race-ease) both;
+}
+
+.race-ui:not(.race-ui--touch) .race-panel--intro,
+.race-ui:not(.race-ui--touch) .race-panel--paused {
+  width: min(100%, 520px);
+}
+
+@keyframes race-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.race-ui .race-title {
+  margin: 0 0 12px;
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.race-ui .race-title--small {
+  font-size: 24px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.race-ui .race-panel-body {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--race-muted);
+  text-wrap: pretty;
+}
+
+.race-ui .race-panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  margin-top: 24px;
+}
+
+.race-ui .race-kbd {
+  display: inline-block;
+  min-width: 24px;
+  padding: 2px 6px;
+  border: 1px solid var(--race-line-strong);
+  border-radius: 6px;
+  background: rgb(234 244 243 / 6%);
+  font-family: var(--race-mono);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--race-ink);
+  text-align: center;
+}
+
+.race-ui .race-controls {
+  margin-top: 24px;
+  border-top: 1px solid var(--race-line);
+}
+
+.race-ui .race-controls-summary {
+  min-height: 44px;
+  padding: 12px 0;
+  color: var(--race-muted);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.race-ui .race-controls-touch {
+  margin: 0 0 12px;
+  color: var(--race-muted);
+  text-wrap: pretty;
+}
+
+.race-ui .race-controls-boost {
+  margin: 16px 0 12px;
+  color: var(--race-ink);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.race-ui .race-legend {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 24px;
+  margin: 0 0 12px;
+}
+
+.race-ui .race-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.race-ui .race-legend dt {
+  display: flex;
+  flex: none;
+  gap: 4px;
+}
+
+.race-ui .race-legend dd {
+  margin: 0;
+  color: var(--race-muted);
+}
+
+.race-ui .race-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 24px 0 0;
+  padding: 16px 0 0;
+  border-top: 1px solid var(--race-line);
+}
+
+.race-ui .race-stat dt {
+  font-family: var(--race-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--race-muted);
+}
+
+.race-ui .race-stat-value {
+  margin: 4px 0 0;
+  font-family: var(--race-mono);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+/* Loading */
+.race-ui .race-load {
+  position: relative;
+  height: 4px;
+  margin-top: 24px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: rgb(234 244 243 / 14%);
+}
+
+.race-ui .race-load-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--race-cyan);
+  transform: scaleX(var(--race-load, 0));
+  transform-origin: left;
+  transition: transform 0.3s var(--race-ease);
+}
+
+.race-ui .race-load--loop .race-load-fill {
+  width: 36%;
+  transform: none;
+  transition: none;
+  animation: race-load 1.4s ease-in-out infinite;
+}
+
+@keyframes race-load {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(280%);
+  }
+}
+
+.race-ui .race-capability {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0 0;
+  font-family: var(--race-mono);
+  font-size: 13px;
+  color: var(--race-muted);
+}
+
+.race-ui .race-capability-name {
+  padding: 2px 8px;
+  border: 1px solid var(--race-line-strong);
+  border-radius: 6px;
+  color: var(--race-cyan);
+}
+
+.race-ui .race-capability--missing,
+.race-ui .race-capability--missing .race-capability-name {
+  border-color: var(--race-warn);
+  color: var(--race-warn);
+}
+
+.race-ui .race-error-detail {
+  margin: 16px 0 0;
+  padding: 12px;
+  border: 1px solid var(--race-line);
+  border-radius: 8px;
+  background: rgb(234 244 243 / 5%);
+  font-family: var(--race-mono);
+  font-size: 13px;
+  color: var(--race-muted);
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Bottom row ---------- */
+
+.race-ui .race-bottom {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "dock";
+  align-items: end;
+  gap: 12px;
+}
+
+.race-ui .race-dock {
+  grid-area: dock;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.race-ui .race-camera-group {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--race-line);
+  border-radius: 14px;
+  background: var(--race-glass);
+  backdrop-filter: var(--race-blur);
+  pointer-events: auto;
+}
+
+.race-ui .race-camera-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: none;
+  color: var(--race-muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  appearance: none;
+  transition:
+    background-color 0.18s var(--race-ease),
+    color 0.18s var(--race-ease);
+}
+
+.race-ui .race-camera-key {
+  font-family: var(--race-mono);
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.race-ui .race-camera-btn[aria-pressed="true"] {
+  border-color: var(--race-line-strong);
+  background: rgb(107 216 239 / 16%);
+  color: var(--race-ink);
+}
+
+@media (hover: hover) {
+  .race-ui .race-camera-btn:hover {
+    color: var(--race-ink);
+  }
+}
+
+.race-ui .race-vitals {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--race-line);
+  border-radius: 14px;
+  background: var(--race-glass);
+  backdrop-filter: var(--race-blur);
+  font-family: var(--race-mono);
+  font-size: 13px;
+}
+
+.race-ui .race-vitals:not(:has(> :not([hidden]))) {
+  display: none;
+}
+
+.race-ui .race-vital {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.race-ui .race-vital-label {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--race-muted);
+}
+
+.race-ui .race-vital--boost {
+  min-width: 160px;
+  font-family: var(--race-sans);
+}
+
+.race-ui .race-vital--boost[data-state="boosting"] {
+  color: var(--race-lime);
+}
+
+.race-ui .race-vital--boost[data-state="exhausted"] {
+  color: var(--race-warn);
+}
+
+.race-ui .race-meter {
+  width: 112px;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: rgb(234 244 243 / 16%);
+}
+
+.race-ui .race-meter-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--race-lime);
+  transform: scaleX(var(--race-stamina, 1));
+  transform-origin: left;
+}
+
+.race-ui--low .race-meter-fill {
+  background: var(--race-warn);
+}
+
+.race-ui--low .race-vital-label {
+  color: var(--race-warn);
+}
+
+/* ---------- Touch controls ---------- */
+
+/*
+ * Phones get the water back. Nothing here is a plate: the controls are thin
+ * outlines pinned to the two bottom corners, and each one takes touches well
+ * outside what it draws.
+ */
+
+.race-ui .race-camera-cycle {
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.race-ui .race-pad,
+.race-ui .race-hold,
+.race-ui .race-swim {
+  touch-action: none;
+  /* stylelint-disable-next-line property-no-vendor-prefix -- Safari still needs it */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* The pad is the touch area. The ring inside it is all that shows. */
+.race-ui .race-pad {
+  --race-pad-ring: 128px;
+  --race-pad-margin: 20px;
+
+  grid-area: pad;
+  position: relative;
+  width: calc(var(--race-pad-ring) + 2 * var(--race-pad-margin));
+  height: calc(var(--race-pad-ring) + 2 * var(--race-pad-margin));
+  margin-left: calc(-1 * var(--race-edge));
+  pointer-events: auto;
+}
+
+.race-ui .race-pad-ring {
+  position: absolute;
+  inset: var(--race-pad-margin);
+  border: 1px solid var(--race-line-strong);
+  border-radius: 50%;
+  background: var(--race-ghost);
+  pointer-events: none;
+}
+
+.race-ui .race-pad-btn {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--race-ink);
+  cursor: pointer;
+  appearance: none;
+  filter: drop-shadow(0 1px 2px rgb(4 12 18 / 70%));
+}
+
+.race-ui .race-pad-btn .race-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.race-ui .race-pad-btn--up,
+.race-ui .race-pad-btn--down {
+  left: calc(50% - 22px);
+}
+
+.race-ui .race-pad-btn--left,
+.race-ui .race-pad-btn--right {
+  top: calc(50% - 22px);
+}
+
+.race-ui .race-pad-btn--up {
+  top: calc(var(--race-pad-margin) + 2px);
+}
+
+.race-ui .race-pad-btn--down {
+  bottom: calc(var(--race-pad-margin) + 2px);
+}
+
+.race-ui .race-pad-btn--left {
+  left: calc(var(--race-pad-margin) + 2px);
+}
+
+.race-ui .race-pad-btn--right {
+  right: calc(var(--race-pad-margin) + 2px);
+}
+
+.race-ui .race-actions {
+  grid-area: actions;
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  padding: 0 8px 24px 0;
+}
+
+.race-ui .race-hold,
+.race-ui .race-swim {
+  position: relative;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--race-line-strong);
+  border-radius: 50%;
+  background: var(--race-ghost);
+  color: var(--race-ink);
+  font: inherit;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgb(4 12 18 / 70%);
+  cursor: pointer;
+  pointer-events: auto;
+  appearance: none;
+  transition:
+    background-color 0.12s linear,
+    border-color 0.12s linear,
+    color 0.12s linear,
+    transform 0.12s var(--race-ease);
+}
+
+/* Invisible margin that still takes the touch. */
+.race-ui .race-hold::after,
+.race-ui .race-swim::after {
+  content: "";
+  position: absolute;
+  inset: -16px;
+  border-radius: 50%;
+}
+
+.race-ui .race-hold--boost {
+  width: 76px;
+  height: 76px;
+  font-size: 13px;
+}
+
+/* Stamina, drawn as a ring round the button that spends it. */
+.race-ui--stamina .race-hold--boost::before {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--race-lime) calc(var(--race-stamina, 1) * 360deg),
+    rgb(234 244 243 / 18%) 0
+  );
+  mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 3.5px),
+    #000 calc(100% - 3px)
+  );
+  pointer-events: none;
+}
+
+.race-ui--stamina.race-ui--low .race-hold--boost::before {
+  background: conic-gradient(
+    var(--race-warn) calc(var(--race-stamina, 1) * 360deg),
+    rgb(234 244 243 / 18%) 0
+  );
+}
+
+.race-ui--low .race-hold--boost {
+  color: var(--race-warn);
+}
+
+.race-ui .race-swim {
+  width: 48px;
+  height: 48px;
+  border-style: dashed;
+  color: var(--race-muted);
+  font-size: 12px;
+}
+
+.race-ui .race-swim::after {
+  inset: -8px;
+}
+
+.race-ui .race-swim[aria-pressed="true"] {
+  border-style: solid;
+  border-color: rgb(217 238 122 / 70%);
+  color: var(--race-lime);
+}
+
+.race-ui .race-swim:active {
+  transform: scale(0.94);
+}
+
+.race-ui .race-pad-btn.race-is-held {
+  background: rgb(217 238 122 / 24%);
+  color: var(--race-lime);
+}
+
+.race-ui .race-hold.race-is-held {
+  border-color: var(--race-lime);
+  background: rgb(217 238 122 / 26%);
+  color: var(--race-lime);
+  transform: scale(0.95);
+}
+
+/* The top bar carries a third button on touch, so the readout takes what is left. */
+.race-ui--touch .race-top {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.race-ui--touch .race-readout {
+  width: 100%;
+  max-width: 520px;
+  justify-self: center;
+}
+
+.race-ui--touch .race-bottom {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: "pad . actions";
+}
+
+/*
+ * Touch moves the camera switch to the top bar and stamina to the Boost ring.
+ * The meter stays in the tree for screen readers.
+ */
+.race-ui--touch .race-dock {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.race-ui--touch::after {
+  height: 96px;
+  opacity: 0.6;
+}
+
+/* ---------- Narrow and short screens ---------- */
+
+/*
+ * Phones either way up. The readout loses its card and its second row and
+ * becomes one line: clock, course strip, distance left, with the lead under it.
+ */
+@media (max-width: 719px), (max-height: 479px) {
+  .race-ui .race-readout {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "timer track remaining"
+      "lead lead lead";
+    align-items: center;
+    gap: 4px 12px;
+    padding: 4px;
+    border: 0;
+    background: none;
+    backdrop-filter: none;
+    text-shadow: 0 1px 3px rgb(4 12 18 / 80%);
+  }
+
+  .race-ui .race-readout-row {
+    display: contents;
+  }
+
+  .race-ui .race-timer {
+    grid-area: timer;
+    font-size: 20px;
+  }
+
+  .race-ui .race-track {
+    grid-area: track;
+  }
+
+  .race-ui .race-remaining {
+    grid-area: remaining;
+    color: var(--race-ink);
+  }
+
+  .race-ui .race-lead {
+    grid-area: lead;
+    font-size: 13px;
+    line-height: 16px;
+  }
+
+  .race-ui .race-key {
+    display: none;
+  }
+}
+
+@media (max-width: 719px) {
+  .race-ui .race-top {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "back actions"
+      "readout readout";
+    gap: 8px;
+  }
+
+  .race-ui .race-panel {
+    padding: 24px;
+  }
+
+  .race-ui .race-title {
+    font-size: 32px;
+  }
+
+  .race-ui .race-dock {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .race-ui .race-camera-btn {
+    flex: 1 1 auto;
+    padding: 0 8px;
+  }
+
+  .race-ui .race-vitals {
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 479px) {
+  .race-ui .race-back {
+    width: 44px;
+    padding: 0;
+  }
+
+  .race-ui .race-back-label {
+    display: none;
+  }
+
+  .race-ui .race-legend {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Phones held sideways. Keep the middle of the screen for the race. */
+@media (max-height: 479px) {
+  .race-ui {
+    --race-edge: 8px;
+
+    gap: 8px;
+  }
+
+  .race-ui .race-panel {
+    padding: 16px 24px;
+  }
+
+  .race-ui .race-title {
+    font-size: 24px;
+  }
+
+  .race-ui .race-controls,
+  .race-ui .race-stats,
+  .race-ui .race-panel-actions {
+    margin-top: 12px;
+  }
+
+  .race-ui .race-pad {
+    --race-pad-ring: 116px;
+    --race-pad-margin: 16px;
+  }
+
+  .race-ui .race-actions {
+    padding-bottom: 16px;
+  }
+
+  .race-ui .race-hold--boost {
+    width: 68px;
+    height: 68px;
+  }
+}
+
+/* ---------- Preferences ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .race-ui *,
+  .race-ui *::before,
+  .race-ui *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .race-ui .race-load--loop .race-load-fill {
+    width: 100%;
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .race-ui {
+    --race-glass: #0a1d28;
+    --race-glass-strong: #08171f;
+    --race-glass-hover: #14303d;
+    --race-ghost: #0a1d28;
+    --race-blur: none;
+  }
+
+  .race-ui .race-panel {
+    backdrop-filter: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .race-ui .race-marker--you .race-marker-dot,
+  .race-ui .race-meter-fill,
+  .race-ui .race-load-fill {
+    background: CanvasText;
+  }
+
+  .race-ui .race-camera-btn[aria-pressed="true"],
+  .race-ui .race-swim[aria-pressed="true"],
+  .race-ui .race-is-held {
+    border-color: Highlight;
+    color: Highlight;
+  }
+
+  /* Forced colours drop gradients, so the ring would vanish. Keep it. */
+  .race-ui--stamina .race-hold--boost::before {
+    forced-color-adjust: none;
+    background: conic-gradient(
+      CanvasText calc(var(--race-stamina, 1) * 360deg),
+      GrayText 0
+    );
+  }
+}
+
+.race-ui .race-credit {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--race-muted);
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* The next-ring cue shares the lead line, leaving the scene and thumb controls open. */
+.race-ui .race-lead-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.race-ui .race-aim {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border: 1px solid currentcolor;
+  border-radius: 50%;
+  color: var(--race-cyan);
+  vertical-align: middle;
+}
+
+.race-ui .race-aim .race-icon {
+  width: 14px;
+  height: 14px;
+  transform: rotate(var(--race-aim-angle, 0deg));
+}
+
+.race-ui .race-aim[data-aligned="true"] {
+  color: var(--race-lime);
+}
+
+.race-ui .race-aim[data-aligned="true"] .race-icon {
+  visibility: hidden;
+}
+
+.race-ui .race-aim[data-aligned="true"]::after {
+  content: "";
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentcolor;
+}
+
+.race-ui .race-aim[data-result="hit"] {
+  color: var(--race-lime);
+  box-shadow: 0 0 0 3px rgb(217 238 122 / 25%);
+}
+
+.race-ui .race-aim[data-result="miss"] {
+  color: var(--race-warn);
+  box-shadow: 0 0 0 3px rgb(255 167 149 / 25%);
+}
+
+.race-ui .race-controls-rule {
+  margin: 0 0 12px;
+  color: var(--race-muted);
+}
+@media (max-width: 719px), (max-height: 479px) {
+  .race-ui .race-lead-group {
+    grid-area: lead;
+  }
+}

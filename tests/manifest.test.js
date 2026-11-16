@@ -112,3 +112,67 @@ test("scraped additions match their recorded code point, sources and original by
     );
   }
 });
+
+test("manifest records native dimensions, display copies and pixel-art hints", async () => {
+  for (const specimen of specimens) {
+    const bytes = await readFile(path.join(publicDir, specimen.file.slice(1)));
+    assert.ok(
+      Number.isInteger(specimen.width) && specimen.width > 0,
+      `${specimen.id}: missing native width`,
+    );
+    assert.ok(
+      Number.isInteger(specimen.height) && specimen.height > 0,
+      `${specimen.id}: missing native height`,
+    );
+    const isSvg = specimen.file.endsWith(".svg");
+    if (!isSvg) {
+      assert.equal(bytes.readUInt32BE(16), specimen.width, specimen.id);
+      assert.equal(bytes.readUInt32BE(20), specimen.height, specimen.id);
+    }
+    if ("rendering" in specimen) {
+      assert.equal(specimen.rendering, "pixelated", specimen.id);
+      assert.ok(
+        !isSvg && Math.max(specimen.width, specimen.height) <= 64,
+        `${specimen.id}: only tiny rasters are shown pixelated`,
+      );
+    }
+    if (!("display" in specimen)) continue;
+    assert.ok(!isSvg, `${specimen.id}: vectors need no display copy`);
+    assert.match(specimen.display, /^\/whales\/display\/[a-z0-9-]+\.webp$/);
+    const displayBytes = await readFile(
+      path.join(publicDir, specimen.display.slice(1)),
+    );
+    assert.ok(
+      displayBytes.length < bytes.length,
+      `${specimen.id}: display copy must be lighter than the original`,
+    );
+    const [original, display] = await Promise.all([
+      loadImage(bytes),
+      loadImage(displayBytes),
+    ]);
+    assert.ok(display.width >= Math.min(original.width, 512), specimen.id);
+    assert.equal(
+      display.width / display.height,
+      original.width / original.height,
+      `${specimen.id}: display copy keeps the aspect ratio`,
+    );
+    // A stale copy of different artwork differs by tens of levels; a faithful
+    // high-quality WebP of the same original differs by well under one.
+    const size = 128;
+    const pixels = (image) => {
+      const canvas = createCanvas(size, size);
+      const context = canvas.getContext("2d");
+      context.drawImage(image, 0, 0, size, size);
+      return context.getImageData(0, 0, size, size).data;
+    };
+    const a = pixels(original);
+    const b = pixels(display);
+    let difference = 0;
+    for (let index = 0; index < a.length; index++)
+      difference += Math.abs(a[index] - b[index]);
+    assert.ok(
+      difference / a.length < 3,
+      `${specimen.id}: display copy does not match its original`,
+    );
+  }
+});

@@ -1,27 +1,58 @@
+/* Splice lab. Uses the global tokens from style.css; only the canvas
+   checkerboard, part colours and selection handles are hardcoded. */
 .splice-editor {
-  --desk: #0c202b;
-  --panel: #102a35;
-  --edge: #31505a;
-  --ink: #edf8f6;
-  --muted: #a4bec1;
+  /* Sticky offsets: the top bar's height, plus the blur tail it trails
+     below itself, which sticky content should clear where it can. */
+  --lab-top: var(--topbar, 72px);
+  --lab-tail: var(--s6);
+  --lab-inspector-w: clamp(288px, 27vw, 360px);
+  --lab-pad: var(--s5);
+  --lab-hover: color-mix(in srgb, var(--ink) 7%, transparent);
+  --lab-press: color-mix(in srgb, var(--ink) 12%, transparent);
+  --lab-halo: rgb(4 16 24 / 0.72);
+  --lab-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
 
-  padding-top: 64px;
-  padding-bottom: 52px;
+  /* Part colours: pastel on artwork, deeper in light-theme chrome. */
+  --spout: #73dce8;
+  --head: #f0cc57;
+  --body: #b6df78;
+  --tail: #e7a8c6;
+  --spout-ui: #13879a;
+  --head-ui: #a87a00;
+  --body-ui: #4f8a1c;
+  --tail-ui: #b8467e;
+
+  padding-top: clamp(32px, 5vw, 64px);
+  padding-bottom: var(--section);
   color: var(--ink);
+  font-family: var(--sans);
 }
 
-[data-theme="light"] .splice-editor {
-  --desk: #e4f0ee;
-  --panel: #f8fcfb;
-  --edge: #a7c1bf;
-  --ink: #102d38;
-  --muted: #4d7075;
+:root:not([data-theme="light"]) .splice-editor {
+  --spout-ui: var(--spout);
+  --head-ui: var(--head);
+  --body-ui: var(--body);
+  --tail-ui: var(--tail);
 }
 
-.splice-editor button,
-.splice-editor select,
-.splice-editor input {
-  font: inherit;
+.part-spout {
+  --part-color: var(--spout);
+  --part-ui: var(--spout-ui);
+}
+
+.part-head {
+  --part-color: var(--head);
+  --part-ui: var(--head-ui);
+}
+
+.part-body {
+  --part-color: var(--body);
+  --part-ui: var(--body-ui);
+}
+
+.part-tail {
+  --part-color: var(--tail);
+  --part-ui: var(--tail-ui);
 }
 
 .splice-editor button {
@@ -33,447 +64,309 @@
   cursor: not-allowed;
 }
 
+/* Disabled primary goes neutral instead of a muddy half-tint. */
+.splice-editor .lab-download:disabled {
+  opacity: 1;
+  background: var(--surface);
+  border-color: var(--line);
+  color: color-mix(in srgb, var(--muted) 70%, transparent);
+}
+
 .splice-editor button:focus-visible,
 .splice-editor input:focus-visible,
 .splice-editor select:focus-visible,
-.selection-box:focus-visible {
-  outline: 3px solid #55cbd6;
-  outline-offset: 3px;
+.splice-editor a:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
-.editor-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: end;
-  gap: 24px;
-  margin-bottom: 36px;
+.splice-editor svg {
+  flex: none;
 }
 
-.editor-heading h1 {
-  font-size: clamp(2.8rem, 5vw, 5rem);
-  letter-spacing: -0.065em;
+/* Heading: the title sits over the workspace, its one line over the
+   inspector, both resting on the frame's top edge. */
+.lab-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--lab-inspector-w);
+  align-items: last baseline;
+  gap: var(--s2) 0;
+  margin-bottom: var(--s5);
+}
+
+.lab-heading h1 {
+  font-size: var(--text-2xl);
+  letter-spacing: -0.035em;
   line-height: 1;
-  margin: 18px 0;
-}
-
-.editor-heading h1 em {
-  color: #62c9d3;
-  font-family: Georgia, serif;
-  font-weight: 400;
-}
-
-.editor-heading p:not(.eyebrow) {
-  color: var(--muted);
   margin: 0;
 }
 
-.editor-heading > a {
-  color: var(--ink);
-  font-size: 0.85rem;
-  white-space: nowrap;
+.lab-heading p {
+  color: var(--muted);
+  font-size: var(--text-base);
+  line-height: 1.4;
+  margin: 0;
+  padding-inline: var(--lab-pad);
+  text-wrap: balance;
 }
 
-.editor-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
-  border: 1px solid var(--edge);
-  background: var(--desk);
-}
-
-.editor-workspace {
-  min-width: 0;
-  padding: 22px;
-}
-
-.editor-toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 18px;
-}
-
-.editor-toolbar > div:first-child {
-  display: grid;
-  gap: 4px;
-}
-
-.editor-kicker,
-.stage-caption,
-.editor-foot,
-.transform-title,
-.editor-seam > span {
-  font: 10px/1.4 monospace;
-  letter-spacing: 0.08em;
+/* Shared pieces */
+.lab-label,
+.lab-caption {
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  line-height: 1.4;
   color: var(--muted);
 }
 
-.editor-toolbar strong {
-  font-size: 1rem;
+.lab-button,
+.lab-link {
+  transition: transform 120ms var(--lab-ease);
 }
 
-.toolbar-actions {
-  display: flex;
-  gap: 6px;
-}
-
-.toolbar-actions button,
-.editor-actions button {
-  border: 1px solid var(--edge);
+.lab-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  min-height: 40px;
+  border: 1px solid var(--line);
   background: var(--panel);
   color: var(--ink);
-  padding: 10px 13px;
+  padding: 0 var(--s4);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  white-space: nowrap;
 }
 
-.stage-shell {
+.lab-button:hover:not(:disabled) {
+  border-color: var(--muted);
+  background: color-mix(in srgb, var(--panel), var(--ink) 6%);
+}
+
+.lab-button:active:not(:disabled),
+.lab-link:active,
+.part-tabs button:active {
+  transform: translateY(1px);
+}
+
+.lab-ghost:active:not(:disabled),
+.part-tabs button:not(.active):active {
+  background: var(--lab-press);
+}
+
+.lab-ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+}
+
+.lab-ghost:hover:not(:disabled) {
+  border-color: transparent;
+  background: var(--lab-hover);
+  color: var(--ink);
+}
+
+.lab-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 0;
+  min-height: 32px;
+  padding: 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  text-decoration: none;
+}
+
+.lab-link:hover {
+  color: var(--ink);
+}
+
+.lab-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--s3);
+}
+
+.lab-group {
+  display: grid;
+  gap: var(--s3);
+}
+
+/* Layout: one frame, workspace and inspector share its edges. */
+.lab-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--lab-inspector-w);
+  border: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.lab-workspace {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+
+  /* Faint dot grid: reads as a work surface, painted once. */
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--ink) 16%, transparent) 1px,
+    transparent 1.5px
+  );
+  background-size: 20px 20px;
+  background-position: 10px 10px;
+}
+
+.lab-viewport {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.lab-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s3) var(--s3) 0;
+}
+
+.lab-history,
+.lab-secondary {
+  display: flex;
+}
+
+/* Undo and redo read as one segmented control. */
+.lab-history .lab-button + .lab-button {
+  margin-left: -1px;
+}
+
+.lab-history .lab-button:hover:not(:disabled) {
+  position: relative;
+}
+
+.lab-secondary {
+  gap: var(--s1);
+}
+
+/* Stage: sized from the viewport height so the whole frame (toolbar,
+   stage, hint) fits below the top bar once scrolled to; width caps it on
+   narrower windows. It stays square at any size. */
+.lab-stage-shell {
+  --lab-stage: clamp(
+    320px,
+    calc(100svh - var(--lab-top) - var(--lab-tail) - 160px),
+    960px
+  );
+
+  flex: 1;
   display: grid;
   place-items: center;
-  padding: 20px;
-  background: #0a1b24;
-  border: 1px solid var(--edge);
+  padding: var(--s5);
   overflow: hidden;
 }
 
-[data-theme="light"] .stage-shell {
-  background: #d0e1df;
-}
-
-.editor-stage {
+.lab-stage {
   position: relative;
-  width: min(100%, 600px);
+  width: min(100%, var(--lab-stage));
   aspect-ratio: 1;
-  background-color: #e5ecea;
-  background-image:
-    linear-gradient(45deg, #cddbd8 25%, transparent 25%),
-    linear-gradient(-45deg, #cddbd8 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #cddbd8 75%),
-    linear-gradient(-45deg, transparent 75%, #cddbd8 75%);
-  background-size: 24px 24px;
-  background-position:
-    0 0,
-    0 12px,
-    12px -12px,
-    -12px 0;
+  background:
+    repeating-conic-gradient(#cddbd8 0 25%, #e8efed 0 50%) 0 0 / 24px 24px;
+  outline: 1px solid color-mix(in srgb, var(--ink) 18%, transparent);
   touch-action: none;
+  contain: layout;
 }
 
-.editor-stage canvas {
+.lab-stage canvas {
   display: block;
   width: 100%;
   height: 100%;
 }
 
-.selection-box {
-  --part-color: #f0cc57;
-
-  position: absolute;
-  border: 2px solid var(--part-color);
-  box-shadow: 0 0 0 1px #142d35;
-  cursor: move;
-  touch-action: none;
-}
-
-.part-spout {
-  --part-color: #73dce8;
-}
-
-.part-head {
-  --part-color: #f0cc57;
-}
-
-.part-body {
-  --part-color: #b6df78;
-}
-
-.part-tail {
-  --part-color: #e7a8c6;
-}
-
-.selection-label {
-  position: absolute;
-  top: 0;
-  left: 0;
-  transform: translateY(-100%);
-  color: #09202a;
-  background: var(--part-color);
-  padding: 3px 6px;
-  font: 10px monospace;
-  pointer-events: none;
-}
-
-.resize-handle,
-.rotate-handle {
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  background: white;
-  border: 2px solid #18323c;
-  padding: 0;
-  touch-action: none;
-}
-
-.resize-handle {
-  right: -9px;
-  bottom: -9px;
-  cursor: nwse-resize;
-}
-
-.rotate-handle {
-  left: 50%;
-  top: -30px;
-  transform: translateX(-50%);
-  border-radius: 50%;
-  cursor: grab;
-}
-
-.rotate-handle::after {
-  content: "";
-  position: absolute;
-  width: 2px;
-  height: 14px;
-  background: var(--part-color);
-  top: 12px;
-  left: 5px;
-}
-
+/* Loading / failure: the checkerboard dissolves toward a frosted base
+   that holds the message. Only shown while the canvas is hidden. */
 .stage-message {
   position: absolute;
   inset: 0;
-  display: grid;
-  place-items: center;
-  text-align: center;
-  padding: 25px;
-  background: #09202add;
-  color: white;
-}
-
-.stage-caption,
-.editor-foot {
   display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 14px;
-}
-
-.editor-help {
-  color: var(--muted);
-  font-size: 0.8rem;
+  align-items: flex-end;
+  padding: var(--s5);
+  color: var(--ink);
+  font-size: var(--text-sm);
   line-height: 1.5;
-  margin: 16px 0 0;
+  animation: lab-fade-in 240ms var(--lab-ease) both;
 }
 
-.editor-inspector {
-  background: var(--panel);
-  border-left: 1px solid var(--edge);
-  padding: 25px;
+.stage-message-text {
+  position: relative;
+  display: grid;
+  gap: var(--s3);
+  max-width: 40ch;
+  animation: lab-rise 320ms var(--lab-ease) 80ms both;
 }
 
-.inspector-head h2 {
-  font-size: 1.8rem;
-  letter-spacing: -0.05em;
-  margin: 8px 0;
+.stage-message-text p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s2) var(--s3);
+  margin: 0;
 }
 
-.inspector-head h2 span {
-  color: #69cad1;
+.stage-message-text p:first-child {
+  font-weight: 500;
 }
 
-.inspector-head p {
-  font-size: 0.85rem;
+.stage-message-text svg {
+  color: var(--accent);
+}
+
+.stage-message-text p:last-child:not(:first-child) {
   color: var(--muted);
+}
+
+.lab-retry {
+  min-height: 36px;
+  padding: 0 var(--s3);
+  font-size: var(--text-sm);
+}
+
+.lab-spin {
+  animation: lab-spin 900ms linear infinite;
+}
+
+.lab-footnote {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--s2) var(--s5);
+  padding: 0 var(--s4) var(--s4);
+}
+
+.lab-hint {
+  max-width: 64ch;
+  color: var(--muted);
+  font-size: var(--text-sm);
   line-height: 1.5;
+  margin: 0;
 }
 
-.part-tabs {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
-  margin: 24px 0;
+.lab-caption {
+  white-space: nowrap;
 }
 
-.part-tabs button {
-  min-width: 0;
-  background: var(--desk);
-  color: var(--ink);
-  border: 1px solid var(--edge);
-  padding: 10px 2px;
-  font-size: 0.73rem;
-}
-
-.part-tabs button.active {
-  border-color: var(--part-color);
-  box-shadow: inset 0 -3px var(--part-color);
-}
-
-.part-tabs small {
-  display: block;
-  color: var(--muted);
-  margin-bottom: 5px;
-  font: 9px monospace;
-}
-
-.editor-field {
-  display: grid;
-  gap: 8px;
-  font-size: 0.8rem;
-  font-weight: 700;
-}
-
-.editor-field select {
-  width: 100%;
-  border: 1px solid var(--edge);
-  padding: 11px;
-  color: var(--ink);
-  background: var(--desk);
-}
-
-.transform-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 26px 0 12px;
-}
-
-.transform-title button,
-.editor-secondary button {
-  background: none;
-  border: 0;
-  color: var(--ink);
-  font-size: 0.75rem;
-  padding: 0;
-}
-
-.transform-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-}
-
-.transform-grid label {
-  font-size: 0.75rem;
-  color: var(--muted);
-}
-
-.transform-grid label span {
-  display: flex;
-  margin-top: 5px;
-  border: 1px solid var(--edge);
-  background: var(--desk);
-  align-items: center;
-}
-
-.transform-grid input {
-  width: 100%;
-  min-width: 0;
-  border: 0;
-  background: transparent;
-  color: var(--ink);
-  padding: 9px;
-}
-
-.transform-grid i {
-  font-style: normal;
-  padding-right: 9px;
-}
-
-.editor-seam {
-  display: grid;
-  gap: 12px;
-  margin: 26px 0;
-}
-
-.editor-seam > span {
-  display: flex;
-  justify-content: space-between;
-}
-
-.editor-seam b {
-  color: var(--ink);
-}
-
-.editor-seam input {
-  width: 100%;
-  accent-color: #7cdbdb;
-}
-
-.editor-actions {
-  display: grid;
-  gap: 8px;
-}
-
-.editor-actions button {
-  display: flex;
-  justify-content: space-between;
-  font-weight: 700;
-}
-
-.editor-actions .editor-download {
-  background: #d9ee7a;
-  color: #102b31;
-  border-color: #d9ee7a;
-}
-
-.editor-secondary {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.editor-notice {
-  color: var(--muted);
-  font-size: 0.75rem;
-  overflow-wrap: anywhere;
-}
-
-.editor-inspector > a {
-  color: var(--ink);
-}
-
-.editor-foot {
-  margin-top: 24px;
-}
-@media (max-width: 800px) {
-  .editor-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .editor-inspector {
-    border-left: 0;
-    border-top: 1px solid var(--edge);
-  }
-
-  .editor-heading {
-    align-items: start;
-    flex-direction: column;
-  }
-
-  .splice-editor {
-    padding-top: 42px;
-  }
-
-  .stage-shell {
-    padding: 18px;
-  }
-}
-@media (max-width: 480px) {
-  .editor-workspace,
-  .editor-inspector {
-    padding: 16px;
-  }
-
-  .stage-shell {
-    padding: 12px;
-  }
-
-  .stage-caption,
-  .editor-foot {
-    flex-wrap: wrap;
-  }
-
-  .toolbar-actions span {
-    display: none;
-  }
+/* Selection: a 2px part-coloured line held between two dark hairlines so
+   it reads on pale checkerboard and dark artwork alike. */
+.selection-box {
+  position: absolute;
+  border: 2px solid var(--part-color);
+  box-shadow:
+    0 0 0 1px var(--lab-halo),
+    inset 0 0 0 1px var(--lab-halo);
+  cursor: move;
+  touch-action: none;
 }
 
 .move-surface {
@@ -486,4 +379,785 @@
   background: transparent;
   cursor: move;
   touch-action: none;
+}
+
+.move-surface:hover {
+  background: color-mix(in srgb, var(--part-color) 10%, transparent);
+}
+
+.lab-stage:active,
+.lab-stage:active .move-surface {
+  cursor: grabbing;
+}
+
+.lab-stage:has(.resize-handle:active),
+.lab-stage:has(.resize-handle:active) .move-surface {
+  cursor: nwse-resize;
+}
+
+.selection-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: #06161e;
+  background: var(--part-color);
+  box-shadow: 0 0 0 1px var(--lab-halo);
+  padding: 1px 6px 2px 5px;
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  line-height: 1.3;
+  pointer-events: none;
+}
+
+/* Handles: 40px hit areas, small visible marks. */
+.resize-handle,
+.rotate-handle {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  touch-action: none;
+}
+
+.resize-handle::after,
+.rotate-handle::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  background: var(--part-color);
+  border: 1.5px solid #06161e;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.55);
+  transition: transform 140ms var(--lab-ease);
+}
+
+.resize-handle:hover::after,
+.rotate-handle:hover::after,
+.resize-handle:active::after,
+.rotate-handle:active::after {
+  transform: scale(1.3);
+}
+
+.resize-handle {
+  right: -21px;
+  bottom: -21px;
+  cursor: nwse-resize;
+}
+
+.rotate-handle {
+  left: 50%;
+  top: -52px;
+  margin-left: -20px;
+  cursor: grab;
+}
+
+.rotate-handle:active {
+  cursor: grabbing;
+}
+
+.rotate-handle::after {
+  border-radius: 50%;
+}
+
+/* Stem from the handle down to the box edge. */
+.rotate-handle::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 26px;
+  width: 2px;
+  height: 26px;
+  margin-left: -1px;
+  background: var(--part-color);
+  box-shadow: 0 0 0 1px var(--lab-halo);
+}
+
+/* The spout starts at the top edge; its handle hangs below instead. */
+.part-spout .rotate-handle {
+  top: auto;
+  bottom: -52px;
+}
+
+.part-spout .rotate-handle::before {
+  top: auto;
+  bottom: 26px;
+}
+
+.splice-editor .selection-box button:focus-visible {
+  outline-offset: -2px;
+}
+
+/* Touch: same 40px hit areas reach a little further, marks grow a step. */
+@media (pointer: coarse) {
+  .resize-handle,
+  .rotate-handle {
+    width: 48px;
+    height: 48px;
+  }
+
+  .resize-handle {
+    right: -25px;
+    bottom: -25px;
+  }
+
+  .rotate-handle {
+    top: -60px;
+    margin-left: -24px;
+  }
+
+  .rotate-handle::before {
+    top: 30px;
+    height: 30px;
+  }
+
+  .part-spout .rotate-handle {
+    bottom: -60px;
+  }
+
+  .part-spout .rotate-handle::before {
+    bottom: 30px;
+  }
+
+  .resize-handle::after,
+  .rotate-handle::after {
+    width: 14px;
+    height: 14px;
+    margin: -7px 0 0 -7px;
+  }
+
+  .lab-link {
+    min-height: 40px;
+  }
+}
+
+/* Inspector */
+.lab-inspector {
+  min-width: 0;
+  background: var(--panel);
+  border-left: 1px solid var(--line);
+}
+
+.lab-inspector-body {
+  container-type: inline-size;
+  display: grid;
+  align-content: start;
+  gap: var(--s5);
+  padding: var(--lab-pad);
+}
+
+.part-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.part-tabs button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  height: 40px;
+  background: transparent;
+  color: var(--muted);
+  border: 0;
+  padding: 0;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  transition: transform 120ms var(--lab-ease);
+}
+
+.part-tabs button + button {
+  border-left: 1px solid var(--line);
+}
+
+.part-tabs button::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: var(--part-ui);
+  opacity: 0.55;
+}
+
+.part-tabs button::after {
+  content: "";
+  position: absolute;
+  inset: -1px -1px auto;
+  height: 2px;
+  background: var(--part-ui);
+  opacity: 0;
+}
+
+.part-tabs button:hover {
+  color: var(--ink);
+  background: var(--lab-hover);
+}
+
+.part-tabs button.active {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--part-ui) 12%, var(--panel));
+}
+
+.part-tabs button.active::before,
+.part-tabs button.active::after {
+  opacity: 1;
+}
+
+.part-tabs button:focus-visible {
+  z-index: 1;
+  outline-offset: -2px;
+}
+
+.lab-field {
+  display: grid;
+  gap: var(--s2);
+}
+
+/* Inputs share one box: 40px, line border, surface fill. */
+.lab-select,
+.transform-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 40px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.lab-select:hover,
+.transform-field:hover {
+  border-color: var(--muted);
+}
+
+.lab-select:focus-within,
+.transform-field:focus-within {
+  border-color: var(--focus);
+  box-shadow: inset 0 0 0 1px var(--focus);
+}
+
+.splice-editor .lab-select select:focus-visible,
+.splice-editor .transform-field input:focus-visible {
+  outline: 0;
+}
+
+.lab-select select {
+  appearance: none;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  padding: 0 40px 0 var(--s3);
+  color: inherit;
+  background: transparent;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.lab-select select option {
+  background: var(--panel);
+  color: var(--ink);
+}
+
+.lab-select svg {
+  position: absolute;
+  right: var(--s3);
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.transform-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s2);
+}
+
+.transform-field {
+  padding-inline: var(--s3);
+  gap: var(--s2);
+  cursor: text;
+}
+
+.field-rotation {
+  grid-column: 1 / -1;
+}
+
+/* A narrow inspector (tablet) stacks the fields so values never clip. */
+@container (max-width: 300px) {
+  .transform-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.transform-field .lab-label {
+  flex: none;
+  min-width: 1.5ch;
+}
+
+.transform-field input {
+  appearance: textfield;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.transform-field input::-webkit-inner-spin-button,
+.transform-field input::-webkit-outer-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+.transform-field i {
+  flex: none;
+  width: 2ch;
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  font-style: normal;
+  color: var(--muted);
+}
+
+/* Seam slider: accent fill on a hairline track, square thumb. */
+.lab-seam {
+  display: grid;
+  gap: var(--s1);
+}
+
+.lab-seam b {
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.lab-seam input {
+  --track: linear-gradient(
+    to right,
+    var(--accent) var(--fill, 0%),
+    var(--line) var(--fill, 0%)
+  );
+
+  appearance: none;
+  width: 100%;
+  height: 32px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.lab-seam input::-webkit-slider-runnable-track {
+  height: 4px;
+  background: var(--track);
+}
+
+.lab-seam input::-moz-range-track {
+  height: 4px;
+  background: var(--line);
+}
+
+.lab-seam input::-moz-range-progress {
+  height: 4px;
+  background: var(--accent);
+}
+
+.lab-seam input::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -6px;
+  background: var(--accent);
+  border: 3px solid var(--panel);
+  box-shadow: 0 0 0 1px var(--accent);
+  transition: transform 120ms var(--lab-ease);
+}
+
+.lab-seam input::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 0;
+  background: var(--accent);
+  border: 3px solid var(--panel);
+  box-shadow: 0 0 0 1px var(--accent);
+  transition: transform 120ms var(--lab-ease);
+}
+
+.lab-seam input:hover::-webkit-slider-thumb,
+.lab-seam input:active::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+
+.lab-seam input:hover::-moz-range-thumb,
+.lab-seam input:active::-moz-range-thumb {
+  transform: scale(1.15);
+}
+
+.splice-editor .lab-seam input:focus-visible {
+  outline-offset: 0;
+}
+
+/* Dock: primary actions and their feedback. */
+.lab-dock {
+  position: relative;
+  display: grid;
+  gap: var(--s3);
+  padding-top: var(--s4);
+  border-top: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.lab-actions {
+  display: grid;
+  gap: var(--s2);
+}
+
+.lab-actions .lab-button {
+  min-height: var(--control);
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+.lab-actions .lab-download {
+  background: var(--highlight);
+  color: var(--on-highlight);
+  border-color: var(--highlight);
+}
+
+.lab-actions .lab-download:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--highlight), var(--on-highlight) 10%);
+  border-color: color-mix(in srgb, var(--highlight), var(--on-highlight) 10%);
+}
+
+/* Space is reserved so a message never pushes the panel around. */
+.lab-feedback {
+  display: grid;
+  align-content: start;
+  gap: var(--s1);
+  min-height: 84px;
+}
+
+.lab-notice {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.lab-notice span:not(:empty),
+.lab-save {
+  display: block;
+  animation: lab-rise 220ms var(--lab-ease) both;
+}
+
+.lab-save {
+  display: inline-flex;
+  color: var(--ink);
+  justify-self: start;
+}
+
+/* Progressive blur: five stacked layers, each blurring more and masked
+   to an overlapping band, plus a tint that settles into the surface.
+   Kept to thin strips (or a static, hidden-canvas overlay) so nothing
+   blurs over the canvas while it redraws. */
+.lab-blur {
+  --tint: var(--bg);
+
+  position: absolute;
+  pointer-events: none;
+  display: none;
+}
+
+.lab-blur i,
+.lab-blur::after {
+  position: absolute;
+  inset: 0;
+}
+
+.lab-blur i {
+  --from: 0%;
+  --to: 40%;
+  --b: 1px;
+
+  mask-image: linear-gradient(
+    var(--dir, to bottom),
+    transparent var(--from),
+    #000 calc(var(--from) + 15%),
+    #000 var(--to),
+    transparent calc(var(--to) + 15%)
+  );
+  backdrop-filter: blur(var(--b));
+}
+
+.lab-blur i:nth-child(1) { --from: -15%; --to: 25%; --b: 0.5px; }
+.lab-blur i:nth-child(2) { --from: 10%; --to: 45%; --b: 1.5px; }
+.lab-blur i:nth-child(3) { --from: 30%; --to: 65%; --b: 3px; }
+.lab-blur i:nth-child(4) { --from: 50%; --to: 85%; --b: 6px; }
+.lab-blur i:nth-child(5) { --from: 70%; --to: 115%; --b: 12px; }
+
+.lab-blur::after {
+  content: "";
+  background: linear-gradient(
+    var(--dir, to bottom),
+    transparent,
+    color-mix(in srgb, var(--tint) 30%, transparent) 55%,
+    color-mix(in srgb, var(--tint) 72%, transparent)
+  );
+}
+
+/* Over the stage while it loads: the lower half frosts over. */
+.lab-blur-veil {
+  --tint: var(--panel);
+
+  display: block;
+  inset: 30% 0 0;
+}
+
+.lab-blur-veil::after {
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in srgb, var(--tint) 55%, transparent) 50%,
+    color-mix(in srgb, var(--tint) 88%, transparent)
+  );
+}
+
+/* Under the sticky stage and above the sticky dock (narrow screens). */
+.lab-blur-down {
+  --dir: to top;
+
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: var(--s6);
+}
+
+.lab-blur-up {
+  --tint: var(--panel);
+
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  height: var(--s6);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .lab-blur i {
+    display: none;
+  }
+
+  .lab-blur::after {
+    background: linear-gradient(
+      var(--dir, to bottom),
+      transparent,
+      color-mix(in srgb, var(--tint) 92%, transparent)
+    );
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .lab-blur i {
+    display: none;
+  }
+
+  .lab-blur::after {
+    background: linear-gradient(
+      var(--dir, to bottom),
+      transparent,
+      var(--tint) 70%
+    );
+  }
+}
+
+@keyframes lab-fade-in {
+  from { opacity: 0; }
+}
+
+@keyframes lab-rise {
+  from { opacity: 0; transform: translateY(4px); }
+}
+
+@keyframes lab-spin {
+  to { transform: rotate(1turn); }
+}
+
+/* Tall desktop windows: the inspector stays beside the stage, its first
+   control landing just clear of the top bar's blur tail. */
+@media (min-width: 721px) and (min-height: 700px) {
+  .lab-inspector-body {
+    position: sticky;
+    top: calc(var(--lab-top) + var(--lab-tail) - var(--lab-pad));
+  }
+}
+
+@media (max-width: 900px) {
+  .lab-secondary span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .lab-secondary .lab-button {
+    width: 40px;
+    padding: 0;
+  }
+
+  .lab-footnote {
+    flex-direction: column;
+    gap: var(--s1);
+  }
+
+  .lab-stage-shell {
+    padding: var(--s5);
+  }
+}
+
+/* Narrow: one column. The toolbar and stage stick under the top bar while
+   the controls scroll beneath them; the actions dock at the bottom. */
+@media (max-width: 720px) {
+  .lab-heading {
+    grid-template-columns: 1fr;
+  }
+
+  .lab-heading p {
+    padding: 0;
+  }
+
+  .lab-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .lab-workspace {
+    display: contents;
+  }
+
+  .lab-viewport {
+    position: sticky;
+    top: var(--lab-top);
+    z-index: 2;
+    background-color: var(--bg);
+  }
+
+  .lab-viewport,
+  .lab-footnote {
+    background-image: radial-gradient(
+      color-mix(in srgb, var(--ink) 16%, transparent) 1px,
+      transparent 1.5px
+    );
+    background-size: 20px 20px;
+    background-position: 10px 10px;
+  }
+
+  .lab-blur-down {
+    display: block;
+  }
+
+  /* The toolbar heads the sticky block, so the top bar's blur tail only
+     ever passes over buttons, never over the redrawing canvas. */
+  .lab-stage-shell {
+    --lab-stage: clamp(220px, 40svh, 420px);
+
+    padding: var(--s3);
+  }
+
+  .lab-footnote {
+    padding-top: var(--s6);
+  }
+
+  .lab-inspector {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .lab-dock {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    gap: 0;
+    margin-inline: calc(-1 * var(--lab-pad));
+    padding: var(--s3) var(--lab-pad) calc(var(--s3) + env(safe-area-inset-bottom));
+    margin-bottom: calc(-1 * var(--lab-pad));
+  }
+
+  .lab-blur-up {
+    display: block;
+  }
+
+  .lab-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .lab-actions .lab-button {
+    padding: 0 var(--s2);
+    font-size: var(--text-sm);
+  }
+
+  .lab-feedback {
+    min-height: 0;
+  }
+
+  .lab-notice span:not(:empty) {
+    padding-top: var(--s2);
+  }
+}
+
+/* Short phones (or landscape): pinning the stage would leave no room for
+   the controls, so it scrolls with the page. */
+@media (max-width: 720px) and (max-height: 640px) {
+  .lab-viewport {
+    position: relative;
+    top: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .splice-editor {
+    --lab-pad: var(--s4);
+  }
+
+  .lab-history span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .lab-history .lab-button {
+    width: 40px;
+    padding: 0;
+  }
+
+  .lab-toolbar {
+    padding: var(--s2) var(--s2) 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splice-editor *,
+  .splice-editor *::before,
+  .splice-editor *::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }

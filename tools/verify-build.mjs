@@ -30,9 +30,13 @@ assert.match(
   /<link rel="canonical" href="https:\/\/roonil03\.github\.io\/TheWhale\/lab\.html"/,
 );
 
+const gameHtml = await readFile(path.join(dist, "game/index.html"), "utf8");
+assert.match(gameHtml, /<title>Race the whale \| The Whale<\/title>/);
+
 for (const [page, contents] of [
   ["index.html", html],
   ["lab.html", labHtml],
+  ["game/index.html", gameHtml],
 ]) {
   const bundles = [
     ...contents.matchAll(/(?:src|href)="([^"]+\.(?:js|css))"/g),
@@ -52,12 +56,38 @@ for (const [page, contents] of [
     );
     await access(path.join(dist, url.slice(base.length)));
   }
+  const font = contents.match(
+    /<link rel="preload" href="([^"]+\.woff2)" as="font" type="font\/woff2" crossorigin>/,
+  )?.[1];
+  assert.ok(
+    font?.startsWith(`${base}assets/`),
+    `Missing font preload in ${page}`,
+  );
+  await access(path.join(dist, font.slice(base.length)));
 }
+const labModule = labHtml.match(
+  /<link rel="modulepreload" href="([^"]+\/SpliceLab-[\w-]+\.js)">/,
+)?.[1];
+assert.ok(labModule, "lab.html must modulepreload the SpliceLab chunk");
+await access(path.join(dist, labModule.slice(base.length)));
+assert.match(
+  labHtml,
+  /<link rel="stylesheet" href="[^"]+\/SpliceLab-[\w-]+\.css">/,
+  "lab.html must link the SpliceLab stylesheet up front",
+);
+assert.doesNotMatch(
+  html,
+  /SpliceLab-/,
+  "The home page must not preload the lab",
+);
+
+assert.doesNotMatch(html, /abyssal-engine|game-[\w-]+\.js/);
+assert.doesNotMatch(labHtml, /abyssal-engine|game-[\w-]+\.js/);
 
 for (const asset of [
+  "game-notices.txt",
   "favicon.svg",
   "og.png",
-  "fonts/space-grotesk-latin.woff2",
   "whale-blueprint.svg",
   "wasm/whale-worker.js",
   "wasm/wasm_exec.js",
@@ -70,9 +100,10 @@ const specimens = JSON.parse(
   await readFile(path.join(dist, "whales/manifest.json"), "utf8"),
 );
 assert.ok(specimens.length > 0, "Missing built specimens");
-for (const { file } of specimens) {
+for (const { file, display } of specimens) {
   assert.match(file, /^\/whales\/[a-z0-9-]+\.(png|svg)$/);
   await access(path.join(dist, file.slice(1)));
+  if (display) await access(path.join(dist, display.slice(1)));
 }
 console.log(
   "Production metadata, Pages bundle paths, and static assets verified.",
