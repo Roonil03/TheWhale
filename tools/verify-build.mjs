@@ -30,9 +30,18 @@ assert.match(
   /<link rel="canonical" href="https:\/\/roonil03\.github\.io\/TheWhale\/lab\.html"/,
 );
 
+const gameHtml = await readFile(path.join(dist, "game/index.html"), "utf8");
+assert.equal(pageTitle(gameHtml), "Race the whale | The Whale");
+const gameFont = gameHtml.match(
+  /<link\s+rel="preload"\s+href="([^"]+\.woff2)"\s+as="font"/,
+)?.[1];
+assert.ok(gameFont?.startsWith(`${base}assets/`), "Missing race font preload");
+await access(path.join(dist, gameFont.slice(base.length)));
+
 for (const [page, contents] of [
   ["index.html", html],
   ["lab.html", labHtml],
+  ["game/index.html", gameHtml],
 ]) {
   const bundles = [
     ...contents.matchAll(/(?:src|href)="([^"]+\.(?:js|css))"/g),
@@ -54,7 +63,11 @@ for (const [page, contents] of [
   }
 }
 
+assert.doesNotMatch(html, /abyssal-engine|game-[\w-]+\.js/);
+assert.doesNotMatch(labHtml, /abyssal-engine|game-[\w-]+\.js/);
+
 for (const asset of [
+  "game-notices.txt",
   "favicon.svg",
   "og.png",
   "fonts/space-grotesk-latin.woff2",

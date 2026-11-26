@@ -23,3 +23,9 @@ The primary font is Space Grotesk, copyright 2020 The Space Grotesk Project Auth
 The original line-art whale and raster social preview are generated using `tools/lineart`. They do not contain vendor emoji artwork. Remixing licensed artwork may create attribution or share-alike obligations; a downloaded collage does not grant additional rights to any source artwork.
 
 Exports combine and modify source images. When sharing a collage, credit the source creators, link to their sources and licenses, and indicate that the artwork was modified. The project license does not replace the artwork licenses.
+
+## Underwater game world
+
+The game adapts the procedural world, renderer, shaders, math, quality selection, and synthesized audio from [Noniv/abyssal-garden](https://github.com/Noniv/abyssal-garden), revision `a596354eff400d458bc2aeb9bdf5e0a9734b2bcf`. Copyright 2026 Maksymilian Dendura. The MIT license is retained at `src/game/vendor/abyssal/LICENSE`. All geometry and sound are generated locally; no third-party models, images, or audio recordings are loaded.
+
+The race HUD uses DM Sans Variable and DM Mono under the SIL Open Font License 1.1, served locally from the Fontsource packages. Its inline Lucide icons retain the ISC notice in `public/game-notices.txt`.

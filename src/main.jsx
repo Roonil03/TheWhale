@@ -111,6 +111,7 @@ function App() {
             <span className="desktop-copy">Splice lab ↗</span>
             <span className="mobile-copy">Splice lab</span>
           </a>
+          <a href={asset("game/")}>Race</a>
         </nav>
         <span className="edition">EST. ONLINE · 01</span>
         <button

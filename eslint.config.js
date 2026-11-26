@@ -9,6 +9,8 @@ export default [
       "node_modules/**",
       ".worktrees/**",
       "public/wasm/wasm_exec.js",
+      "src/game/vendor/abyssal/**",
+      "src/game/race-engine.js",
     ],
   },
   js.configs.recommended,

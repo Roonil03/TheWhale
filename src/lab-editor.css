@@ -549,9 +549,7 @@
   }
 
   .stage-shell {
-    padding: 0;
-    overflow: clip;
-    overflow-clip-margin: 11px;
+    padding: 8px;
   }
 
   .editor-stage {
