@@ -5,19 +5,15 @@
     "file": "/whales/apple.png",
     "source": "https://github.com/iamcal/emoji-data/tree/master/img-apple-160",
     "license": "Apple artwork; not licensed for commercial use by source",
-    "version": "macOS 15.5",
-    "width": 160,
-    "height": 160
+    "version": "macOS 15.5"
   },
   {
     "id": "google",
     "name": "Google",
-    "file": "/whales/google.svg",
-    "source": "https://github.com/googlefonts/noto-emoji/blob/b3e3051a088047d19fd4d49b1c3ac42fb8c3aaf8/svg/emoji_u1f433.svg",
+    "file": "/whales/google.png",
+    "source": "https://github.com/iamcal/emoji-data/tree/master/img-google-136",
     "license": "Apache-2.0",
-    "version": "Noto Emoji v2.048",
-    "width": 128,
-    "height": 128
+    "version": "Noto Emoji v2.048"
   },
   {
     "id": "whatsapp",
@@ -25,30 +21,23 @@
     "file": "/whales/whatsapp.png",
     "source": "https://emojipedia.org/whatsapp/2.23.2.72/spouting-whale",
     "license": "WhatsApp artwork; reuse rights not established",
-    "version": "WhatsApp 2.23.2.72",
-    "width": 160,
-    "height": 160
+    "version": "WhatsApp 2.23.2.72"
   },
   {
     "id": "facebook",
     "name": "Facebook",
     "file": "/whales/facebook.png",
-    "source": "https://emojipedia.org/facebook/15.0/spouting-whale",
+    "source": "https://github.com/iamcal/emoji-data/tree/master/img-facebook-96",
     "license": "Facebook artwork; license unclear",
-    "version": "Facebook 15.0",
-    "width": 512,
-    "height": 512,
-    "display": "/whales/display/facebook.webp"
+    "version": "v9, fetched 2024-02-05"
   },
   {
     "id": "twitter",
     "name": "Twitter",
-    "file": "/whales/twitter.svg",
-    "source": "https://github.com/jdecked/twemoji/blob/50c7abfe6813680455781862f7b34305cd1eb9f5/assets/svg/1f433.svg",
+    "file": "/whales/twitter.png",
+    "source": "https://github.com/iamcal/emoji-data/tree/master/img-twitter-72",
     "license": "CC BY 4.0",
-    "version": "Twemoji fork v16.0.1",
-    "width": 36,
-    "height": 36
+    "version": "Twemoji fork v16.0.1"
   },
   {
     "id": "openmoji",
@@ -56,9 +45,7 @@
     "file": "/whales/openmoji.svg",
     "source": "https://github.com/hfg-gmuend/openmoji/blob/master/color/svg/1F433.svg",
     "license": "CC BY-SA 4.0",
-    "version": "upstream master, retrieved 2026-11-13",
-    "width": 72,
-    "height": 72
+    "version": "upstream master, retrieved 2026-11-13"
   },
   {
     "id": "microsoft-fluent-3d",
@@ -66,10 +53,7 @@
     "file": "/whales/microsoft-fluent-3d.png",
     "source": "https://github.com/microsoft/fluentui-emoji/tree/1ffb34c752ecf5d402f04cfb4b392c77f57c54bc/assets/Spouting%20whale/3D",
     "version": "Fluent Emoji · 1ffb34c",
-    "license": "MIT; Copyright (c) Microsoft Corporation. Include the MIT copyright and permission notice when redistributing.",
-    "width": 256,
-    "height": 256,
-    "display": "/whales/display/microsoft-fluent-3d.webp"
+    "license": "MIT; Copyright (c) Microsoft Corporation. Include the MIT copyright and permission notice when redistributing."
   },
   {
     "id": "microsoft-fluent-flat",
@@ -77,9 +61,7 @@
     "file": "/whales/microsoft-fluent-flat.svg",
     "source": "https://github.com/microsoft/fluentui-emoji/tree/1ffb34c752ecf5d402f04cfb4b392c77f57c54bc/assets/Spouting%20whale/Flat",
     "version": "Fluent Emoji · 1ffb34c",
-    "license": "MIT; Copyright (c) Microsoft Corporation. Include the MIT copyright and permission notice when redistributing.",
-    "width": 32,
-    "height": 32
+    "license": "MIT; Copyright (c) Microsoft Corporation. Include the MIT copyright and permission notice when redistributing."
   },
   {
     "id": "samsung-one-ui-7",
@@ -87,9 +69,7 @@
     "file": "/whales/samsung-one-ui-7.png",
     "source": "https://emojipedia.org/samsung/one-ui-7.0-april-2025/spouting-whale",
     "version": "One UI 7.0 April 2025",
-    "license": "Proprietary vendor artwork; redistribution permission unestablished.",
-    "width": 108,
-    "height": 108
+    "license": "Proprietary vendor artwork; redistribution permission unestablished."
   },
   {
     "id": "joypixels-7",
@@ -97,10 +77,7 @@
     "file": "/whales/joypixels-7.png",
     "source": "https://emojipedia.org/joypixels/7.0/spouting-whale",
     "version": "7.0",
-    "license": "JoyPixels proprietary artwork; redistribution permission unestablished. JoyPixels offers licensed use subject to its terms.",
-    "width": 512,
-    "height": 512,
-    "display": "/whales/display/joypixels-7.webp"
+    "license": "JoyPixels proprietary artwork; redistribution permission unestablished. JoyPixels offers licensed use subject to its terms."
   },
   {
     "id": "skype-1-2",
@@ -108,9 +85,7 @@
     "file": "/whales/skype-1-2.png",
     "source": "https://emojipedia.org/skype/1.2/spouting-whale",
     "version": "Emoticons 1.2",
-    "license": "Proprietary vendor artwork; redistribution permission unestablished.",
-    "width": 240,
-    "height": 240
+    "license": "Proprietary vendor artwork; redistribution permission unestablished."
   },
   {
     "id": "emojitwo",
@@ -118,9 +93,7 @@
     "file": "/whales/emojitwo.svg",
     "source": "https://github.com/EmojiTwo/emojitwo",
     "version": "Upstream 311eff5",
-    "license": "CC BY 4.0; Emojitwo community, originally EmojiOne 2.2 by Ranks.com",
-    "width": 64,
-    "height": 64
+    "license": "CC BY 4.0; Emojitwo community, originally EmojiOne 2.2 by Ranks.com"
   },
   {
     "id": "fxemoji",
@@ -128,9 +101,7 @@
     "file": "/whales/fxemoji.svg",
     "source": "https://github.com/mozilla/fxemoji",
     "version": "Upstream 270af34",
-    "license": "CC BY 4.0; Mozilla Foundation visual design",
-    "width": 512,
-    "height": 512
+    "license": "CC BY 4.0; Mozilla Foundation visual design"
   },
   {
     "id": "blobmoji",
@@ -138,9 +109,7 @@
     "file": "/whales/blobmoji.svg",
     "source": "https://github.com/C1710/blobmoji",
     "version": "Upstream 7dd14d2",
-    "license": "Apache-2.0; Noto Emoji and Blobmoji contributors",
-    "width": 128,
-    "height": 128
+    "license": "Apache-2.0; Noto Emoji and Blobmoji contributors"
   },
   {
     "id": "noto-3d",
@@ -148,10 +117,7 @@
     "file": "/whales/noto-3d.png",
     "source": "https://googlefonts.github.io/noto-emoji-files/?emoji=emoji_u1f433",
     "version": "CDN latest, retrieved 2026-11-13",
-    "license": "Static 3D PNG license not established; Google documents CC BY 4.0 for animated assets",
-    "width": 512,
-    "height": 512,
-    "display": "/whales/display/noto-3d.webp"
+    "license": "Static 3D PNG license not established; Google documents CC BY 4.0 for animated assets"
   },
   {
     "id": "apple-legacy-2008",
@@ -159,10 +125,7 @@
     "file": "/whales/apple-legacy-2008.png",
     "source": "https://emojipedia.org/apple/iphone-os-2.2/spouting-whale",
     "version": "iPhone OS 2.2",
-    "license": "Copyright Apple; redistribution license for this CDN image not established",
-    "width": 32,
-    "height": 32,
-    "rendering": "pixelated"
+    "license": "Copyright Apple; redistribution license for this CDN image not established"
   },
   {
     "id": "google-legacy-2015",
@@ -170,9 +133,7 @@
     "file": "/whales/google-legacy-2015.png",
     "source": "https://emojipedia.org/google/android-6.0.1/spouting-whale",
     "version": "Android 6.0.1",
-    "license": "Copyright Google; redistribution license for this CDN image not established",
-    "width": 136,
-    "height": 128
+    "license": "Copyright Google; redistribution license for this CDN image not established"
   },
   {
     "id": "au-kddi-type-f",
@@ -180,9 +141,7 @@
     "file": "/whales/au-kddi-type-f.png",
     "source": "https://emojipedia.org/au-kddi/type-f/spouting-whale",
     "version": "Type F",
-    "license": "Copyright KDDI; redistribution license for this CDN image not established",
-    "width": 144,
-    "height": 144
+    "license": "Copyright KDDI; redistribution license for this CDN image not established"
   },
   {
     "id": "htc-sense-7",
@@ -190,9 +149,7 @@
     "file": "/whales/htc-sense-7.png",
     "source": "https://emojipedia.org/htc/sense-7/spouting-whale",
     "version": "Sense 7",
-    "license": "Copyright HTC; redistribution license for this CDN image not established",
-    "width": 136,
-    "height": 136
+    "license": "Copyright HTC; redistribution license for this CDN image not established"
   },
   {
     "id": "lg-g5",
@@ -200,8 +157,6 @@
     "file": "/whales/lg-g5.png",
     "source": "https://emojipedia.org/lg/g5/spouting-whale",
     "version": "G5",
-    "license": "Copyright LG; redistribution license for this CDN image not established",
-    "width": 128,
-    "height": 128
+    "license": "Copyright LG; redistribution license for this CDN image not established"
   }
 ]

@@ -3,47 +3,6 @@
   "retrievedDate": "2026-11-13",
   "assets": [
     {
-      "id": "google",
-      "name": "Google",
-      "file": "/whales/google.svg",
-      "source": "https://github.com/googlefonts/noto-emoji/blob/b3e3051a088047d19fd4d49b1c3ac42fb8c3aaf8/svg/emoji_u1f433.svg",
-      "assetUrl": "https://raw.githubusercontent.com/googlefonts/noto-emoji/b3e3051a088047d19fd4d49b1c3ac42fb8c3aaf8/svg/emoji_u1f433.svg",
-      "version": "Noto Emoji v2.048 (tag v2.048, commit b3e3051a088047d19fd4d49b1c3ac42fb8c3aaf8)",
-      "license": "Apache-2.0",
-      "licenseUrl": "https://github.com/googlefonts/noto-emoji/blob/b3e3051a088047d19fd4d49b1c3ac42fb8c3aaf8/svg/LICENSE",
-      "sha256": "5583ac364c99573a76501dd9335431e415696009bd4c9f0db6ebdb1b761bcb80",
-      "retrievedDate": "2026-11-15",
-      "codepoint": "U+1F433",
-      "replaces": "128 px PNG from emoji-data (SHA-256 ab3975e24dfa1e524a90c4556ea2b2317ab2b205ec36016a46a6cf84fdf163d8), byte-identical to png/128/emoji_u1f433.png at the same tag; the SVG is that release's vector source."
-    },
-    {
-      "id": "facebook",
-      "name": "Facebook",
-      "file": "/whales/facebook.png",
-      "source": "https://emojipedia.org/facebook/15.0/spouting-whale",
-      "assetUrl": "https://em-content.zobj.net/source/facebook/355/spouting-whale_1f433.png",
-      "version": "Facebook 15.0",
-      "license": "Facebook artwork; license unclear",
-      "sha256": "fa85ead14c83fd696ec81b29ba4b0619479773f2f524becd5d877e1bbf628248",
-      "retrievedDate": "2026-11-15",
-      "codepoint": "U+1F433",
-      "replaces": "96 px PNG from emoji-data img-facebook-96 (v9, fetched 2024-02-05). Emojipedia serves these identical 512 px bytes for Facebook 3.0 through 16.0; downscaled to 96 px it matches the previous file to a mean channel difference of 1.25/255 (resampling only). Facebook 2.2 is a different drawing and was not used."
-    },
-    {
-      "id": "twitter",
-      "name": "Twitter",
-      "file": "/whales/twitter.svg",
-      "source": "https://github.com/jdecked/twemoji/blob/50c7abfe6813680455781862f7b34305cd1eb9f5/assets/svg/1f433.svg",
-      "assetUrl": "https://raw.githubusercontent.com/jdecked/twemoji/50c7abfe6813680455781862f7b34305cd1eb9f5/assets/svg/1f433.svg",
-      "version": "Twemoji fork v16.0.1 (tag v16.0.1, commit 50c7abfe6813680455781862f7b34305cd1eb9f5)",
-      "license": "CC BY 4.0",
-      "licenseUrl": "https://github.com/jdecked/twemoji/blob/50c7abfe6813680455781862f7b34305cd1eb9f5/LICENSE-GRAPHICS",
-      "sha256": "28d63fec48ab0c89355c23de6727b6fe04de522a4760f9cfa8361f7de40a745d",
-      "retrievedDate": "2026-11-15",
-      "codepoint": "U+1F433",
-      "replaces": "72 px PNG from emoji-data img-twitter-72 (SHA-256 7854c6f4b20ef062f78982b45b814efb31f54b2a6da6d509b44abbc87e60fbb6), byte-identical to assets/72x72/1f433.png at the same tag; the SVG is that release's vector source."
-    },
-    {
       "id": "microsoft-fluent-3d",
       "name": "Microsoft 3D",
       "file": "/whales/microsoft-fluent-3d.png",
