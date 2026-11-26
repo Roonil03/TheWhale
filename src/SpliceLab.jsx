@@ -346,11 +346,19 @@ export function SpliceLab() {
             <span className="dot yellow" /> THE SPLICE LAB / 01—04
           </p>
           <h1 id="lab-title">
-            Make waves. <em>Make weird.</em>
+            <span className="desktop-copy">
+              Make waves. <em>Make weird.</em>
+            </span>
+            <span className="mobile-copy">Splice lab</span>
           </h1>
           <p>
-            Four pieces, countless improbable whales. Select a part and make it
-            your own.
+            <span className="desktop-copy">
+              Four pieces, countless improbable whales. Select a part and make
+              it your own.
+            </span>
+            <span className="mobile-copy">
+              Combine four parts from different whales.
+            </span>
           </p>
         </div>
         <a href={asset("") + "#collection"}>← Back to collection</a>
@@ -362,104 +370,106 @@ export function SpliceLab() {
       ) : (
         <div className="editor-layout">
           <div className="editor-workspace">
-            <div className="editor-toolbar">
-              <div>
-                <span className="editor-kicker">YOUR SPECIMEN</span>
-                <strong>Assembly canvas</strong>
-              </div>
-              <div className="toolbar-actions">
-                <button
-                  onClick={() => {
-                    invalidate();
-                    setH(undo(historyRef.current));
-                  }}
-                  disabled={!history.past.length}
-                  aria-label="Undo"
-                >
-                  ↶ <span>Undo</span>
-                </button>
-                <button
-                  onClick={() => {
-                    invalidate();
-                    setH(redo(historyRef.current));
-                  }}
-                  disabled={!history.future.length}
-                  aria-label="Redo"
-                >
-                  ↷ <span>Redo</span>
-                </button>
-              </div>
-            </div>
-            <div className="stage-shell">
-              <div
-                className="editor-stage"
-                ref={stage}
-                onPointerDown={selectAt}
-                onPointerMove={move}
-                onPointerUp={(e) => finish(e)}
-                onPointerCancel={(e) => finish(e, true)}
-                onLostPointerCapture={(e) => finish(e, true)}
-                aria-label="Whale assembly canvas"
-              >
-                <canvas
-                  ref={canvas}
-                  width="600"
-                  height="600"
-                  aria-label="Preview of your spliced whale"
-                  style={{ visibility: ready ? "visible" : "hidden" }}
-                />
-                {ready && (
-                  <div
-                    className={"selection-box part-" + selected}
-                    style={{
-                      left: `${(b.x + b.width / 2 + t.x) / 6}%`,
-                      top: `${(b.y + b.height / 2 + t.y) / 6}%`,
-                      width: `${(b.width * t.scaleX) / 6}%`,
-                      height: `${(b.height * t.scaleY) / 6}%`,
-                      transform: `translate(-50%, -50%) rotate(${t.rotation}deg)`,
+            <div className="editor-viewport">
+              <div className="editor-toolbar">
+                <div>
+                  <span className="editor-kicker">YOUR SPECIMEN</span>
+                  <strong>Assembly canvas</strong>
+                </div>
+                <div className="toolbar-actions">
+                  <button
+                    onClick={() => {
+                      invalidate();
+                      setH(undo(historyRef.current));
                     }}
-                    role="group"
-                    aria-label={name(selected) + " selection"}
+                    disabled={!history.past.length}
+                    aria-label="Undo"
                   >
-                    <button
-                      className="move-surface"
-                      aria-label={"Move " + name(selected)}
-                      onPointerDown={(e) => start(e, "move")}
-                    />
-                    <span className="selection-label">{name(selected)}</span>
-                    <button
-                      className="rotate-handle"
-                      aria-label={"Rotate " + name(selected)}
-                      onPointerDown={(e) => start(e, "rotate")}
-                    />
-                    <button
-                      className="resize-handle"
-                      aria-label={"Resize " + name(selected)}
-                      onPointerDown={(e) => start(e, "resize")}
-                    />
-                  </div>
-                )}
-                {!ready && (
-                  <div className="stage-message" role="status">
-                    {failed.some((id) =>
-                      PARTS.some((part) => state.parts[part] === id),
-                    ) ? (
-                      <span>
-                        A selected image could not be loaded.{" "}
-                        <button
-                          type="button"
-                          onPointerDown={(event) => event.stopPropagation()}
-                          onClick={retryImages}
-                        >
-                          Retry
-                        </button>{" "}
-                        or choose another specimen.
-                      </span>
-                    ) : (
-                      "Preparing your specimen…"
-                    )}
-                  </div>
-                )}
+                    ↶ <span>Undo</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      invalidate();
+                      setH(redo(historyRef.current));
+                    }}
+                    disabled={!history.future.length}
+                    aria-label="Redo"
+                  >
+                    ↷ <span>Redo</span>
+                  </button>
+                </div>
+              </div>
+              <div className="stage-shell">
+                <div
+                  className="editor-stage"
+                  ref={stage}
+                  onPointerDown={selectAt}
+                  onPointerMove={move}
+                  onPointerUp={(e) => finish(e)}
+                  onPointerCancel={(e) => finish(e, true)}
+                  onLostPointerCapture={(e) => finish(e, true)}
+                  aria-label="Whale assembly canvas"
+                >
+                  <canvas
+                    ref={canvas}
+                    width="600"
+                    height="600"
+                    aria-label="Preview of your spliced whale"
+                    style={{ visibility: ready ? "visible" : "hidden" }}
+                  />
+                  {ready && (
+                    <div
+                      className={"selection-box part-" + selected}
+                      style={{
+                        left: `${(b.x + b.width / 2 + t.x) / 6}%`,
+                        top: `${(b.y + b.height / 2 + t.y) / 6}%`,
+                        width: `${(b.width * t.scaleX) / 6}%`,
+                        height: `${(b.height * t.scaleY) / 6}%`,
+                        transform: `translate(-50%, -50%) rotate(${t.rotation}deg)`,
+                      }}
+                      role="group"
+                      aria-label={name(selected) + " selection"}
+                    >
+                      <button
+                        className="move-surface"
+                        aria-label={"Move " + name(selected)}
+                        onPointerDown={(e) => start(e, "move")}
+                      />
+                      <span className="selection-label">{name(selected)}</span>
+                      <button
+                        className="rotate-handle"
+                        aria-label={"Rotate " + name(selected)}
+                        onPointerDown={(e) => start(e, "rotate")}
+                      />
+                      <button
+                        className="resize-handle"
+                        aria-label={"Resize " + name(selected)}
+                        onPointerDown={(e) => start(e, "resize")}
+                      />
+                    </div>
+                  )}
+                  {!ready && (
+                    <div className="stage-message" role="status">
+                      {failed.some((id) =>
+                        PARTS.some((part) => state.parts[part] === id),
+                      ) ? (
+                        <span>
+                          A selected image could not be loaded.{" "}
+                          <button
+                            type="button"
+                            onPointerDown={(event) => event.stopPropagation()}
+                            onClick={retryImages}
+                          >
+                            Retry
+                          </button>{" "}
+                          or choose another specimen.
+                        </span>
+                      ) : (
+                        "Preparing your specimen…"
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             <div className="stage-caption">
@@ -467,9 +477,15 @@ export function SpliceLab() {
               <span>600 × 600 PX · TRANSPARENT PNG</span>
             </div>
             <p className="editor-help">
-              Drag a slice to move it. Use the corner to resize and the top
-              handle to rotate. Arrow keys nudge; hold Shift for 10 px. Escape
-              cancels a drag.
+              <span className="desktop-copy">
+                Drag a slice to move it. Use the corner to resize and the top
+                handle to rotate. Arrow keys nudge; hold Shift for 10 px. Escape
+                cancels a drag.
+              </span>
+              <span className="mobile-copy">
+                Drag a slice to move it. Use the corner to resize and the top
+                handle to rotate.
+              </span>
             </p>
           </div>
           <aside className="editor-inspector">

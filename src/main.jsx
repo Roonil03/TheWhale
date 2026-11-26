@@ -93,13 +93,24 @@ function App() {
     <>
       <header className="topbar">
         <a className="brand" href={asset("")}>
-          <span className="brand-mark">◉</span> THE WHALE{" "}
-          <span className="brand-divider">/</span>{" "}
-          <span className="brand-sub">FIELD GUIDE</span>
+          <span className="desktop-copy">
+            <span className="brand-mark">◉</span> THE WHALE{" "}
+            <span className="brand-divider">/</span>{" "}
+            <span className="brand-sub">FIELD GUIDE</span>
+          </span>
+          <span className="mobile-copy">
+            <span className="brand-mark" aria-hidden="true">≋</span> The Whale
+          </span>
         </a>
         <nav aria-label="Main navigation">
-          <a href={asset("") + "#collection"}>The collection</a>
-          <a href={asset("lab.html")}>Splice lab ↗</a>
+          <a href={asset("") + "#collection"}>
+            <span className="desktop-copy">The collection</span>
+            <span className="mobile-copy">Collection</span>
+          </a>
+          <a href={asset("lab.html")} aria-current={labPage ? "page" : undefined}>
+            <span className="desktop-copy">Splice lab ↗</span>
+            <span className="mobile-copy">Splice lab</span>
+          </a>
         </nav>
         <span className="edition">EST. ONLINE · 01</span>
         <button
@@ -126,20 +137,31 @@ function App() {
                 <h1>
                   One whale.
                   <br />
-                  <em>Many ways</em>
-                  <br />
-                  to whale<span className="blue">.</span>
+                  <em>Many ways<span className="mobile-copy">.</span></em>
+                  <span className="desktop-copy">
+                    <br />
+                    to whale<span className="blue">.</span>
+                  </span>
                 </h1>
                 <p className="hero-desc">
-                  A small celebration of the world's most wonderfully
-                  inconsistent sea creature. Same emoji, different oceans.
+                  <span className="desktop-copy">
+                    A small celebration of the world's most wonderfully
+                    inconsistent sea creature. Same emoji, different oceans.
+                  </span>
+                  <span className="mobile-copy">
+                    The spouting whale emoji as each platform draws it, side by
+                    side and ready to splice together.
+                  </span>
                 </p>
                 <div className="hero-actions">
                   <a className="button primary" href="#collection">
-                    Explore the collection <span>↘</span>
+                    <span className="desktop-copy">Explore the collection</span>
+                    <span className="mobile-copy">Browse the collection</span>
+                    <span aria-hidden="true">↘</span>
                   </a>
                   <a className="text-link" href={asset("lab.html")}>
-                    Go make a monster ↗
+                    <span className="desktop-copy">Go make a monster ↗</span>
+                    <span className="mobile-copy">Open the splice lab</span>
                   </a>
                 </div>
               </div>
@@ -152,6 +174,12 @@ function App() {
                   <span>NOT TO SCALE ↗</span>
                 </div>
                 <div className="hero-whale">🐳</div>
+                <span className="mobile-copy hero-reflection" aria-hidden="true">
+                  🐳
+                </span>
+                <span className="mobile-copy hero-code" aria-hidden="true">
+                  U+1F433
+                </span>
                 <div className="ripple r1" />
                 <div className="ripple r2" />
                 <div className="ripple r3" />
@@ -181,15 +209,23 @@ function App() {
                     <span className="dot" /> THE COLLECTION
                   </p>
                   <h2>
-                    Same whale.
-                    <br />
-                    <em>Different waters.</em>
+                    <span className="desktop-copy">
+                      Same whale.
+                      <br />
+                      <em>Different waters.</em>
+                    </span>
+                    <span className="mobile-copy">The collection</span>
                   </h2>
                 </div>
                 <div className="section-intro">
                   <p>
-                    From friendly to slightly concerned, every platform has its
-                    own take. Take a closer look, then send one to the lab.
+                    <span className="desktop-copy">
+                      From friendly to slightly concerned, every platform has its
+                      own take. Take a closer look, then send one to the lab.
+                    </span>
+                    <span className="mobile-copy">
+                      Pick a whale to open it in the splice lab.
+                    </span>
                   </p>
                   <span>THE SPECIMENS ↓</span>
                 </div>
@@ -206,7 +242,7 @@ function App() {
                     onChange={(e) => setQuery(e.target.value)}
                   />
                 </div>
-                <span className="results">
+                <span className="results" aria-live="polite">
                   {pad(filtered.length)} / {pad(items.length)} SPECIMENS
                 </span>
               </div>

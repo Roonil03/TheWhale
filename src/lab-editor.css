@@ -487,3 +487,170 @@
   cursor: move;
   touch-action: none;
 }
+
+.editor-viewport {
+  display: contents;
+}
+
+@media (max-width: 600px) {
+  .splice-editor {
+    padding-block: 26px 40px;
+  }
+
+  .editor-heading {
+    margin-bottom: 24px;
+  }
+
+  .editor-heading h1 {
+    font-size: clamp(32px, 10vw, 48px);
+    margin: 0 0 8px;
+    letter-spacing: -0.045em;
+  }
+
+  .editor-heading .eyebrow,
+  .editor-heading > a,
+  .editor-kicker,
+  .stage-caption span:first-child,
+  .inspector-head,
+  .part-tabs small {
+    display: none;
+  }
+
+  .editor-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .editor-workspace {
+    display: contents;
+  }
+
+  .editor-viewport {
+    display: block;
+    padding: 8px 11px 12px;
+    min-width: 0;
+    background: var(--desk);
+    background-image: radial-gradient(var(--edge) 1px, transparent 1.5px);
+    background-position: 8px 8px;
+    background-size: 20px 20px;
+  }
+
+  .editor-toolbar {
+    margin-bottom: 8px;
+  }
+
+  .editor-toolbar strong {
+    font-size: 0.9rem;
+  }
+
+  .toolbar-actions button {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 8px;
+  }
+
+  .stage-shell {
+    padding: 0;
+    overflow: clip;
+    overflow-clip-margin: 11px;
+  }
+
+  .editor-stage {
+    width: 100%;
+  }
+
+  .stage-caption {
+    grid-row: 3;
+    margin: 4px 16px 14px;
+  }
+
+  .editor-help {
+    grid-row: 2;
+    margin: 14px 16px 0;
+  }
+
+  .editor-inspector {
+    padding: 16px;
+  }
+
+  .part-tabs {
+    margin: 0 0 16px;
+  }
+
+  .part-tabs button,
+  .editor-secondary button,
+  .transform-title button {
+    min-height: 44px;
+  }
+
+  .editor-field select,
+  .transform-grid input {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .transform-title {
+    margin: 12px 0 4px;
+  }
+
+  .editor-seam input {
+    min-height: 32px;
+    margin-inline: 0;
+  }
+
+  .editor-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .editor-actions button {
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 44px;
+    padding: 6px;
+    font-size: 0.8rem;
+  }
+
+  .editor-secondary {
+    margin-top: 8px;
+  }
+}
+
+@media (max-width: 600px) and (pointer: coarse) {
+  .resize-handle::before,
+  .rotate-handle::before {
+    content: "";
+    position: absolute;
+    inset: -12px;
+  }
+}
+
+@media (max-width: 600px) and (min-height: 641px) {
+  .splice-editor {
+    --stage-size: min(100%, 40svh, 420px);
+  }
+
+  .editor-viewport {
+    position: sticky;
+    top: 65px;
+    z-index: 2;
+  }
+
+  .editor-stage {
+    width: var(--stage-size);
+  }
+
+  .editor-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    margin-inline: -16px;
+    padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
+    background: var(--panel);
+    border-top: 1px solid var(--edge);
+  }
+
+  .editor-inspector :is(button, select, input, a) {
+    scroll-margin-top: calc(40svh + 144px);
+    scroll-margin-bottom: 72px;
+  }
+}
