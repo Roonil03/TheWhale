@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { PARTS, parseEditorRecipe, shareEditorUrl } from "./mixer";
-import specimens from "virtual:whale-manifest";
-import { RENDER_SIZE, createWhaleRenderer } from "./compositor";
+import { createWhaleRenderer } from "./compositor";
 import { createImageLoader } from "./image-loader";
 import {
   PART_BOUNDS,
@@ -16,37 +15,22 @@ import {
   redo,
   hitTestPart,
 } from "./editor-model";
-import {
-  Check,
-  ChevronDown,
-  CircleAlert,
-  Download,
-  Link,
-  LoaderCircle,
-  Redo2,
-  RefreshCcw,
-  RefreshCw,
-  RotateCcw,
-  Shuffle,
-  Undo2,
-} from "lucide-react";
 import "./lab-editor.css";
 
 const asset = (path) => import.meta.env.BASE_URL + path.replace(/^\/?/, "");
 const name = (part) => part[0].toUpperCase() + part.slice(1);
 
 export function SpliceLab() {
-  const items = specimens;
-  const [images, setImages] = useState({}),
+  const [items, setItems] = useState([]),
+    [images, setImages] = useState({}),
     [failed, setFailed] = useState([]),
-    [retryRevision, setRetryRevision] = useState(0);
-  const [history, setHistory] = useState(() =>
-      createHistory(parseEditorRecipe(specimens, location.search)),
-    ),
+    [retryRevision, setRetryRevision] = useState(0),
+    [error, setError] = useState("");
+  const [history, setHistory] = useState(null),
     [selected, setSelected] = useState("head"),
     [notice, setNotice] = useState(""),
     [exportUrl, setExportUrl] = useState("");
-  const historyRef = useRef(history),
+  const historyRef = useRef(null),
     canvas = useRef(null),
     stage = useRef(null),
     gesture = useRef(null),
@@ -70,6 +54,29 @@ export function SpliceLab() {
     },
     [exportUrl],
   );
+  useEffect(() => {
+    let alive = true;
+    fetch(asset("whales/manifest.json"), { cache: "no-cache" })
+      .then((r) => {
+        if (!r.ok) throw Error();
+        return r.json();
+      })
+      .then((data) => {
+        if (!Array.isArray(data) || !data.length) throw Error();
+        if (!alive) return;
+        setItems(data);
+        setH(createHistory(parseEditorRecipe(data, location.search)));
+      })
+      .catch(() => {
+        if (alive)
+          setError(
+            "The collection could not be loaded. Please refresh the page.",
+          );
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
   const state = history?.present;
   const selectedIds = state
     ? [...new Set(PARTS.map((part) => state.parts[part]))].sort()
@@ -331,76 +338,70 @@ export function SpliceLab() {
   };
   const b = PART_BOUNDS[selected],
     t = state?.transforms[selected];
-  const icon = { size: 16, strokeWidth: 1.75, "aria-hidden": true };
   return (
     <section className="splice-editor wrap" aria-labelledby="lab-title">
-      <header className="lab-heading">
-        <h1 id="lab-title">Splice lab</h1>
-        <p>Combine four parts from different whales.</p>
-      </header>
-      {
-        <div className="lab-layout">
-          <div className="lab-workspace">
-            <div className="lab-viewport">
-              <div className="lab-toolbar">
-                <div className="lab-history">
+      <div className="editor-heading">
+        <div>
+          <p className="eyebrow">
+            <span className="dot yellow" /> THE SPLICE LAB / 01—04
+          </p>
+          <h1 id="lab-title">
+            <span className="desktop-copy">
+              Make waves. <em>Make weird.</em>
+            </span>
+            <span className="mobile-copy">Splice lab</span>
+          </h1>
+          <p>
+            <span className="desktop-copy">
+              Four pieces, countless improbable whales. Select a part and make
+              it your own.
+            </span>
+            <span className="mobile-copy">
+              Combine four parts from different whales.
+            </span>
+          </p>
+        </div>
+        <a href={asset("") + "#collection"}>← Back to collection</a>
+      </div>
+      {error ? (
+        <p role="alert">{error}</p>
+      ) : !state ? (
+        <p role="status">Preparing the lab…</p>
+      ) : (
+        <div className="editor-layout">
+          <div className="editor-workspace">
+            <div className="editor-viewport">
+              <div className="editor-toolbar">
+                <div>
+                  <span className="editor-kicker">YOUR SPECIMEN</span>
+                  <strong>Assembly canvas</strong>
+                </div>
+                <div className="toolbar-actions">
                   <button
-                    className="lab-button"
                     onClick={() => {
                       invalidate();
                       setH(undo(historyRef.current));
                     }}
                     disabled={!history.past.length}
                     aria-label="Undo"
-                    title="Undo (Ctrl+Z)"
                   >
-                    <Undo2 {...icon} />
-                    <span>Undo</span>
+                    ↶ <span>Undo</span>
                   </button>
                   <button
-                    className="lab-button"
                     onClick={() => {
                       invalidate();
                       setH(redo(historyRef.current));
                     }}
                     disabled={!history.future.length}
                     aria-label="Redo"
-                    title="Redo (Ctrl+Y)"
                   >
-                    <Redo2 {...icon} />
-                    <span>Redo</span>
-                  </button>
-                </div>
-                <div className="lab-secondary">
-                  <button
-                    className="lab-button lab-ghost"
-                    onClick={() =>
-                      edit({
-                        ...state,
-                        parts: Object.fromEntries(
-                          PARTS.map((part) => [
-                            part,
-                            items[Math.floor(Math.random() * items.length)].id,
-                          ]),
-                        ),
-                      })
-                    }
-                  >
-                    <Shuffle {...icon} />
-                    <span>Shuffle parts</span>
-                  </button>
-                  <button
-                    className="lab-button lab-ghost"
-                    onClick={() => edit(parseEditorRecipe(items, ""))}
-                  >
-                    <RefreshCcw {...icon} />
-                    <span>Reset lab</span>
+                    ↷ <span>Redo</span>
                   </button>
                 </div>
               </div>
-              <div className="lab-stage-shell">
+              <div className="stage-shell">
                 <div
-                  className="lab-stage"
+                  className="editor-stage"
                   ref={stage}
                   onPointerDown={selectAt}
                   onPointerMove={move}
@@ -408,12 +409,11 @@ export function SpliceLab() {
                   onPointerCancel={(e) => finish(e, true)}
                   onLostPointerCapture={(e) => finish(e, true)}
                   aria-label="Whale assembly canvas"
-                  aria-describedby="lab-hint"
                 >
                   <canvas
                     ref={canvas}
-                    width={RENDER_SIZE}
-                    height={RENDER_SIZE}
+                    width="600"
+                    height="600"
                     aria-label="Preview of your spliced whale"
                     style={{ visibility: ready ? "visible" : "hidden" }}
                   />
@@ -450,232 +450,211 @@ export function SpliceLab() {
                   )}
                   {!ready && (
                     <div className="stage-message" role="status">
-                      <div
-                        className="lab-blur lab-blur-veil"
-                        aria-hidden="true"
-                      >
-                        <i />
-                        <i />
-                        <i />
-                        <i />
-                        <i />
-                      </div>
                       {failed.some((id) =>
                         PARTS.some((part) => state.parts[part] === id),
                       ) ? (
-                        <div className="stage-message-text">
-                          <p>
-                            <CircleAlert {...icon} />A selected image could not
-                            be loaded.
-                          </p>
-                          <p>
-                            <button
-                              type="button"
-                              className="lab-button lab-retry"
-                              onPointerDown={(event) => event.stopPropagation()}
-                              onClick={retryImages}
-                            >
-                              <RefreshCw {...icon} />
-                              Retry
-                            </button>
-                            or choose another specimen.
-                          </p>
-                        </div>
+                        <span>
+                          A selected image could not be loaded.{" "}
+                          <button
+                            type="button"
+                            onPointerDown={(event) => event.stopPropagation()}
+                            onClick={retryImages}
+                          >
+                            Retry
+                          </button>{" "}
+                          or choose another specimen.
+                        </span>
                       ) : (
-                        <div className="stage-message-text">
-                          <p>
-                            <LoaderCircle {...icon} className="lab-spin" />
-                            Preparing your specimen…
-                          </p>
-                        </div>
+                        "Preparing your specimen…"
                       )}
                     </div>
                   )}
                 </div>
               </div>
-              <div className="lab-blur lab-blur-down" aria-hidden="true">
-                <i />
-                <i />
-                <i />
-                <i />
-                <i />
-              </div>
             </div>
-            <div className="lab-footnote">
-              <p className="lab-hint" id="lab-hint">
-                Drag to move, corner to resize, top handle to rotate. Arrow keys
-                nudge (Shift: 10 px), Esc cancels.
-              </p>
-              <span className="lab-caption">
-                {RENDER_SIZE} × {RENDER_SIZE} transparent PNG
+            <div className="stage-caption">
+              <span>FIG. X / THE IMPROBABLE WHALE</span>
+              <span>600 × 600 PX · TRANSPARENT PNG</span>
+            </div>
+            <p className="editor-help">
+              <span className="desktop-copy">
+                Drag a slice to move it. Use the corner to resize and the top
+                handle to rotate. Arrow keys nudge; hold Shift for 10 px. Escape
+                cancels a drag.
               </span>
-            </div>
+              <span className="mobile-copy">
+                Drag a slice to move it. Use the corner to resize and the top
+                handle to rotate.
+              </span>
+            </p>
           </div>
-          <aside className="lab-inspector">
-            <div className="lab-inspector-body">
-              <div className="part-tabs" aria-label="Select a whale part">
-                {PARTS.map((part) => (
-                  <button
-                    key={part}
-                    className={
-                      selected === part ? "active part-" + part : "part-" + part
-                    }
-                    aria-pressed={selected === part}
-                    onClick={() => setSelected(part)}
-                  >
-                    {name(part)}
-                  </button>
-                ))}
-              </div>
-              <label className="lab-field">
-                <span className="lab-label">{name(selected)} specimen</span>
-                <span className="lab-select">
-                  <select
-                    value={state.parts[selected]}
-                    onChange={(e) =>
-                      edit({
-                        ...state,
-                        parts: { ...state.parts, [selected]: e.target.value },
-                      })
-                    }
-                  >
-                    {items.map((item) => (
-                      <option key={item.id} value={item.id}>
-                        {item.name}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown {...icon} />
-                </span>
-              </label>
-              <div className="lab-group">
-                <div className="lab-row">
-                  <span className="lab-label">Transform</span>
-                  <button
-                    className="lab-link"
-                    aria-label={"Reset " + name(selected)}
-                    onClick={() =>
-                      changeTransform({
-                        x: 0,
-                        y: 0,
-                        scaleX: 1,
-                        scaleY: 1,
-                        rotation: 0,
-                      })
-                    }
-                  >
-                    <RotateCcw {...icon} />
-                    Reset
-                  </button>
-                </div>
-                <div className="transform-grid">
-                  {[
-                    ["x", "X", "px"],
-                    ["y", "Y", "px"],
-                    ["scaleX", "Width", "%"],
-                    ["scaleY", "Height", "%"],
-                    ["rotation", "Rotation", "°"],
-                  ].map(([key, label, unit]) => (
-                    <label key={key} className={"transform-field field-" + key}>
-                      <span className="lab-label">{label}</span>
-                      <input
-                        type="number"
-                        aria-label={name(selected) + " " + label}
-                        value={
-                          Math.round(
-                            t[key] * (key.startsWith("scale") ? 100 : 1) * 10,
-                          ) / 10
-                        }
-                        onChange={(e) => {
-                          if (e.target.value !== "")
-                            changeTransform({
-                              [key]:
-                                Number(e.target.value) /
-                                (key.startsWith("scale") ? 100 : 1),
-                            });
-                        }}
-                      />
-                      <i>{unit}</i>
-                    </label>
-                  ))}
-                </div>
-              </div>
-              <label className="lab-seam">
-                <span className="lab-row">
-                  <span className="lab-label">Soften seams</span>
-                  <b>{state.softness}%</b>
-                </span>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={state.softness}
-                  style={{ "--fill": state.softness + "%" }}
-                  onPointerDown={() => {
-                    invalidate();
-                    setH(beginGesture(historyRef.current));
-                  }}
-                  onPointerUp={() => setH(commitGesture(historyRef.current))}
-                  onPointerCancel={() =>
-                    setH(cancelGesture(historyRef.current))
-                  }
-                  onChange={(e) => {
-                    const current = historyRef.current;
-                    const next = {
-                      ...current.present,
-                      softness: Number(e.target.value),
-                    };
-                    if (current.gesture) setH(updateGesture(current, next));
-                    else edit(next);
-                  }}
-                />
-              </label>
-              <div className="lab-dock">
-                <div className="lab-blur lab-blur-up" aria-hidden="true">
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                </div>
-                <div className="lab-actions">
-                  <button
-                    className="lab-button lab-download"
-                    disabled={!ready || !!history.gesture}
-                    onClick={download}
-                  >
-                    <Download {...icon} />
-                    Download PNG
-                  </button>
-                  <button className="lab-button" onClick={share}>
-                    {notice === "Share link copied." ? (
-                      <Check {...icon} />
-                    ) : (
-                      <Link {...icon} />
-                    )}
-                    Copy share link
-                  </button>
-                </div>
-                <div className="lab-feedback">
-                  <p className="lab-notice" role="status">
-                    <span key={notice}>{notice}</span>
-                  </p>
-                  {exportUrl && (
-                    <a
-                      className="lab-link lab-save"
-                      href={exportUrl}
-                      download="the-whale-splice.png"
-                    >
-                      <Download {...icon} />
-                      Save PNG
-                    </a>
-                  )}
-                </div>
-              </div>
+          <aside className="editor-inspector">
+            <div className="inspector-head">
+              <span className="editor-kicker">ASSEMBLY / 01—04</span>
+              <h2>
+                Choose your parts<span>.</span>
+              </h2>
+              <p>Mix specimens, then adjust each slice.</p>
             </div>
+            <div className="part-tabs" aria-label="Select a whale part">
+              {PARTS.map((part, i) => (
+                <button
+                  key={part}
+                  className={
+                    selected === part ? "active part-" + part : "part-" + part
+                  }
+                  aria-pressed={selected === part}
+                  onClick={() => setSelected(part)}
+                >
+                  <small>0{i + 1}</small>
+                  {name(part)}
+                </button>
+              ))}
+            </div>
+            <label className="editor-field">
+              {name(selected)} specimen
+              <select
+                value={state.parts[selected]}
+                onChange={(e) =>
+                  edit({
+                    ...state,
+                    parts: { ...state.parts, [selected]: e.target.value },
+                  })
+                }
+              >
+                {items.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="transform-title">
+              <span>TRANSFORM / {name(selected).toUpperCase()}</span>
+              <button
+                onClick={() =>
+                  changeTransform({
+                    x: 0,
+                    y: 0,
+                    scaleX: 1,
+                    scaleY: 1,
+                    rotation: 0,
+                  })
+                }
+              >
+                Reset part ↺
+              </button>
+            </div>
+            <div className="transform-grid">
+              {[
+                ["x", "X", "px"],
+                ["y", "Y", "px"],
+                ["scaleX", "Width", "%"],
+                ["scaleY", "Height", "%"],
+                ["rotation", "Rotation", "°"],
+              ].map(([key, label, unit]) => (
+                <label key={key}>
+                  {label}
+                  <span>
+                    <input
+                      type="number"
+                      aria-label={name(selected) + " " + label}
+                      value={
+                        Math.round(
+                          t[key] * (key.startsWith("scale") ? 100 : 1) * 10,
+                        ) / 10
+                      }
+                      onChange={(e) => {
+                        if (e.target.value !== "")
+                          changeTransform({
+                            [key]:
+                              Number(e.target.value) /
+                              (key.startsWith("scale") ? 100 : 1),
+                          });
+                      }}
+                    />
+                    <i>{unit}</i>
+                  </span>
+                </label>
+              ))}
+            </div>
+            <label className="editor-seam">
+              <span>
+                SOFTEN SEAMS <b>{state.softness}%</b>
+              </span>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={state.softness}
+                onPointerDown={() => {
+                  invalidate();
+                  setH(beginGesture(historyRef.current));
+                }}
+                onPointerUp={() => setH(commitGesture(historyRef.current))}
+                onPointerCancel={() => setH(cancelGesture(historyRef.current))}
+                onChange={(e) => {
+                  const current = historyRef.current;
+                  const next = {
+                    ...current.present,
+                    softness: Number(e.target.value),
+                  };
+                  if (current.gesture) setH(updateGesture(current, next));
+                  else edit(next);
+                }}
+              />
+              <span>
+                <small>SHARP</small>
+                <small>SOFT</small>
+              </span>
+            </label>
+            <div className="editor-actions">
+              <button
+                className="editor-download"
+                disabled={!ready || !!history.gesture}
+                onClick={download}
+              >
+                Download PNG <span>↓</span>
+              </button>
+              <button onClick={share}>
+                Copy share link <span>↗</span>
+              </button>
+            </div>
+            <div className="editor-secondary">
+              <button
+                onClick={() =>
+                  edit({
+                    ...state,
+                    parts: Object.fromEntries(
+                      PARTS.map((part) => [
+                        part,
+                        items[Math.floor(Math.random() * items.length)].id,
+                      ]),
+                    ),
+                  })
+                }
+              >
+                ↝ Shuffle parts
+              </button>
+              <button onClick={() => edit(parseEditorRecipe(items, ""))}>
+                ↺ Reset lab
+              </button>
+            </div>
+            <p className="editor-notice" role="status">
+              {notice}
+            </p>
+            {exportUrl && (
+              <a href={exportUrl} download="the-whale-splice.png">
+                Save PNG ↗
+              </a>
+            )}
           </aside>
         </div>
-      }
+      )}
+      <div className="editor-foot">
+        <span>MADE OF MANY WHALES. BELONGS TO NO OCEAN.</span>
+        <span>YOUR CREATION STAYS IN YOUR BROWSER.</span>
+      </div>
     </section>
   );
 }

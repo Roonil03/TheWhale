@@ -50,23 +50,3 @@ test("independent in-flight selections settle without replacing each other", asy
   assert.equal(loader.get("a").status, "ready");
   assert.equal(loader.get("b").status, "ready");
 });
-
-test("decodes before reporting ready so the first canvas draw does not block", async () => {
-  let finishDecode;
-  const image = { decode: () => new Promise((r) => (finishDecode = r)) };
-  const loader = createImageLoader(() => image);
-  const pending = loader.load("a", "/a.png");
-  assert.equal(image.decoding, "async");
-  image.onload();
-  assert.equal(loader.get("a").status, "loading");
-  finishDecode();
-  assert.equal((await pending).status, "ready");
-});
-
-test("a rejected decode still reports the loaded image as ready", async () => {
-  const image = { decode: () => Promise.reject(new Error("EncodingError")) };
-  const loader = createImageLoader(() => image);
-  const pending = loader.load("a", "/a.png");
-  image.onload();
-  assert.equal((await pending).status, "ready");
-});

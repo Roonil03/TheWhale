@@ -7,23 +7,14 @@ export function createImageLoader(createImage = () => new Image()) {
       const image = createImage();
       const entry = { status: "loading", image };
       entry.promise = new Promise((resolve) => {
-        const ready = () => {
-          if (entries.get(id) !== entry) return;
+        image.onload = () => {
           entry.status = "ready";
           resolve(entry);
-        };
-        image.onload = () => {
-          // Decode off the main thread before the first canvas draw needs the
-          // pixels; a failed decode still leaves a drawable loaded image.
-          if (typeof image.decode === "function")
-            image.decode().then(ready, ready);
-          else ready();
         };
         image.onerror = () => {
           entry.status = "failed";
           resolve(entry);
         };
-        image.decoding = "async";
         image.src = src;
       });
       entries.set(id, entry);
