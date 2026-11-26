@@ -31,6 +31,7 @@ export function SpliceLab() {
     [notice, setNotice] = useState(""),
     [exportUrl, setExportUrl] = useState("");
   const historyRef = useRef(null),
+    historyTap = useRef(null),
     canvas = useRef(null),
     stage = useRef(null),
     gesture = useRef(null),
@@ -47,6 +48,45 @@ export function SpliceLab() {
     version.current++;
     setExportUrl("");
     setNotice("");
+  };
+  const startHistoryTap = (event) => {
+    const button = event.target.closest("button");
+    const touch = event.touches[0];
+    historyTap.current =
+      matchMedia("(max-width: 600px)").matches &&
+      event.touches.length === 1 &&
+      button &&
+      !button.disabled
+        ? { button, touch }
+        : null;
+  };
+  const cancelHistoryTap = () => {
+    historyTap.current = null;
+  };
+  const finishHistoryTap = (event) => {
+    const tap = historyTap.current;
+    cancelHistoryTap();
+    const touch = event.changedTouches[0];
+    if (
+      !tap ||
+      !event.cancelable ||
+      event.touches.length ||
+      touch?.identifier !== tap.touch.identifier ||
+      Math.hypot(
+        touch.clientX - tap.touch.clientX,
+        touch.clientY - tap.touch.clientY,
+      ) > 10 ||
+      !tap.button.contains(
+        document.elementFromPoint(touch.clientX, touch.clientY),
+      )
+    ) {
+      return;
+    }
+
+    // The canvas's captured touch can leave Chrome without a follow-up click.
+    // Cancel the compatibility click before running the button's usual action.
+    event.preventDefault();
+    tap.button.click();
   };
   useEffect(
     () => () => {
@@ -376,7 +416,13 @@ export function SpliceLab() {
                   <span className="editor-kicker">YOUR SPECIMEN</span>
                   <strong>Assembly canvas</strong>
                 </div>
-                <div className="toolbar-actions">
+                <div
+                  className="toolbar-actions"
+                  onTouchStart={startHistoryTap}
+                  onTouchCancel={cancelHistoryTap}
+                  onPointerCancel={cancelHistoryTap}
+                  onTouchEnd={finishHistoryTap}
+                >
                   <button
                     onClick={() => {
                       invalidate();
