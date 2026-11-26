@@ -56,6 +56,7 @@ Every callback states what the player wants. None of them change what the HUD sh
 | `winner` | `'player'`, `'whale'`, `'tie'` | Read during `finished`. `'whale'` is the rival. Without it, the sign of `lead` decides. |
 | `error` | string, or `{ code, title, message }` | Read during `error`. |
 | `muted` | boolean | Picks the sound icon and its label. |
+| `soundAvailable` | boolean | Hides the sound control if Web Audio is unavailable. Racing remains available. |
 | `stamina` | 0 to 1 | Boost reserve. A bar on desktop, a ring round Boost on touch. Both turn coral under 20% and hide when the field is missing. |
 | `boosting` | boolean | Desktop Boost hint reads "Boosting" while extra speed is active. |
 | `exhausted` | boolean | Desktop Boost hint reads "Refill to 30%" until stamina recovers enough to boost again. |

@@ -419,7 +419,7 @@ function racePush() {
   rUiT = 0; rLastPhase = s.phase; rLastCam = rCam; rPushGate = s.gate;
   hudSend({ phase: s.phase, camera: rCam, elapsed: s.elapsed, countdown: s.countdown, progress: s.progress, whaleProgress: s.whaleProgress,
     distance: s.distance, lead: s.lead, winner: s.winner, stamina: s.stamina, boosting: s.boosting, exhausted: s.exhausted,
-    speed: s.speed, muted, quality: QNAME[LV], error: null,
+    speed: s.speed, muted, soundAvailable, quality: QNAME[LV], error: null,
     // steering gates: heading-relative aim (+ = turn right / up)
     aimX: a.aimX, aimY: a.aimY, aimYaw: a.aimYaw, aligned: a.aligned, aimTarget,
     hasAim: race.checkpoint < raceCourse.checkpoints.length,
@@ -432,7 +432,7 @@ callbacks.pause = (paused) => { if (!rReady) return; if (RM.setPaused(race, paus
 callbacks.restart = () => { if (!rReady) return; sound(); RM.restartRace(race); RM.clearInput(race); rSnap = true; racePush(); };
 callbacks.camera = (id) => { if (!RM.CAMERAS.includes(id) || id === rCam) return; rCam = id; rSnap = true; if (rReady) racePush(); };
 callbacks.input = (patch) => { if (rReady) RM.setInput(race, patch); };
-callbacks.sound = (want) => { sound(); if ((want === undefined ? !muted : !!want) !== muted) mute(); racePush(); };
+callbacks.sound = (want) => { sound(); if (soundAvailable && (want === undefined ? !muted : !!want) !== muted) mute(); racePush(); };
 document.addEventListener('visibilitychange', () => { if (document.hidden && rReady) { RM.clearInput(race); if (RM.setPaused(race, true)) racePush(); } });
 addEventListener('blur', () => RM.clearInput(race));
 

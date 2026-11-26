@@ -4,6 +4,7 @@
 // A fixed Web Audio graph, built on the first click / key / touch and driven by a 10 Hz timer, not the frame loop.
 // Layers: rumble, surface wash, water rush (follows camera speed), drone, bubbles, chimes and distant whale calls.
 let AC, OUT, muted = false;
+let soundAvailable = typeof AudioContext === 'function';
 const VOL = 0.78; // master level: about -18.5 LUFS, peaks near -5.5 dBFS
 function mkSound(ac) {
   const sr = ac.sampleRate;
@@ -62,10 +63,27 @@ function mkSound(ac) {
     }
   };
 }
-// called on every click / key / touch: builds the graph once and resumes it when the browser allows
+// Build the graph on demand. A missing API or failed audio graph must leave the race playable.
 function sound() {
-  if (!AC) { AC = new AudioContext({ latencyHint: 'playback' }); setInterval(mkSound(AC), 100); }
-  if (AC.state === 'suspended' && !document.hidden) AC.resume();
+  if (!soundAvailable) return;
+  if (!AC) {
+    let context;
+    try {
+      context = new AudioContext({ latencyHint: 'playback' });
+      const tick = mkSound(context);
+      AC = context;
+      setInterval(tick, 100);
+    } catch (error) {
+      soundAvailable = false;
+      OUT = null;
+      context?.close().catch(() => {});
+      console.warn('Whale race audio is unavailable:', error);
+      return;
+    }
+  }
+  if (AC.state === 'suspended' && !document.hidden) AC.resume().catch(() => {});
 }
 const mute = () => { muted = !muted; OUT.gain.setTargetAtTime(muted ? 0 : VOL, AC.currentTime, 0.08); };
-document.addEventListener('visibilitychange', () => { if (AC) document.hidden ? AC.suspend() : AC.resume(); });
+document.addEventListener('visibilitychange', () => {
+  if (AC) (document.hidden ? AC.suspend() : AC.resume()).catch(() => {});
+});

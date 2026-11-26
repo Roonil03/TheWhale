@@ -28,6 +28,7 @@
  *   Read in the `error` phase. A `code` containing "webgpu" selects the
  *   WebGPU explanation. So does a browser without `navigator.gpu`.
  * @property {boolean} [muted]
+ * @property {boolean} [soundAvailable] The audio control is available.
  * @property {number} [stamina] Boost reserve, 0 to 1. The meter hides when
  *   this is missing.
  * @property {boolean} [boosting] Boost is currently adding speed.
@@ -303,6 +304,7 @@ export function createRaceUI({
     winner: null,
     error: null,
     muted: false,
+    soundAvailable: true,
     stamina: null,
     boosting: false,
     exhausted: false,
@@ -1019,7 +1021,7 @@ export function createRaceUI({
         if (phase === "racing") call(onPause, true);
         else if (phase === "paused") call(onPause, false);
       } else if (event.code === "KeyM") {
-        if (phase !== "loading" && phase !== "error")
+        if (state.soundAvailable && phase !== "loading" && phase !== "error")
           call(onSound, !state.muted);
       }
     });
@@ -1040,7 +1042,6 @@ export function createRaceUI({
     root.classList.toggle("race-ui--touch", touch);
     scrim.hidden = playing;
     readout.hidden = !live;
-    soundBtn.hidden = phase === "loading" || phase === "error";
     pauseBtn.hidden = phase !== "racing";
     dock.hidden = !playing;
     camera.hidden = touch;
@@ -1339,6 +1340,13 @@ export function createRaceUI({
     const next = PHASES.has(state.phase) ? state.phase : "loading";
     if (next !== phase) enterPhase(next);
 
+    put(
+      "sound-visible",
+      state.soundAvailable && phase !== "loading" && phase !== "error",
+      (visible) => {
+        soundBtn.hidden = !visible;
+      },
+    );
     put("muted", Boolean(state.muted), (muted) => {
       soundBtn.replaceChildren(icon(muted ? "volume-x" : "volume-2"));
       soundBtn.setAttribute(
